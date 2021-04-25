@@ -41,7 +41,7 @@ namespace ConsoleProject
             command.CommandText = @"UPDATE actors SET fullname = $fullname, country = $country, birthDate = $birthDate WHERE id = $id";
             command.Parameters.AddWithValue("$fullname", actor.fullname);
             command.Parameters.AddWithValue("$country", actor.country);
-            command.Parameters.AddWithValue("$birthDate", actor.birthDate);
+            command.Parameters.AddWithValue("$birthDate", actor.birthDate.ToShortDateString());
             command.Parameters.AddWithValue("$id", id);
             int result = command.ExecuteNonQuery();
             connection.Close();
