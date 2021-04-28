@@ -67,17 +67,17 @@ namespace ConsoleProject
             connection.Close();
             return actor;
         }
-        public LinkedList<Actor> GetAll()
+        public List<Actor> GetAll()
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"SELECT * FROM actors";
             SqliteDataReader reader = command.ExecuteReader();
-            LinkedList<Actor> actors = new LinkedList<Actor>();
+            List<Actor> actors = new List<Actor>();
             while(reader.Read())
             {
                 Actor currentActor = GetActor(reader);
-                actors.AddLast(currentActor);
+                actors.Add(currentActor);
             }
             reader.Close();
             connection.Close();

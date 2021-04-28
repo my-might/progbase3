@@ -102,6 +102,7 @@ namespace ConsoleProject
                 Film film = new Film();
                 film.title = GenerateFromFile(generatorPath + "titles.txt");
                 film.genre = GenerateFromFile(generatorPath + "genres.txt");
+                film.description = GenerateFromFile(generatorPath + "descriptions.txt");
                 Random ran = new Random();
                 film.releaseYear = ran.Next(start, end+1);
                 repo.Insert(film);

@@ -1,25 +1,24 @@
+using System;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 namespace ConsoleProject
 {
-    public class FilmRepository
+    public class RoleRepository
     {
         private SqliteConnection connection;
-        public FilmRepository(SqliteConnection connection)
+        public RoleRepository(SqliteConnection connection)
         {
             this.connection = connection;
         }
-        public long Insert(Film film)
+        public long Insert(Role role)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"INSERT INTO films (title,genre,description,releaseYear)
-                                    VALUES ($title,$genre,$description,$releaseYear);
+            command.CommandText = @"INSERT INTO roles (actorId,filmId)
+                                    VALUES ($actorId,$filmId);
                                     SELECT last_insert_rowid();";
-            command.Parameters.AddWithValue("$title", film.title);
-            command.Parameters.AddWithValue("$genre", film.genre);
-            command.Parameters.AddWithValue("$description", film.description);
-            command.Parameters.AddWithValue("$releaseYear", film.releaseYear);
+            command.Parameters.AddWithValue("$actorId", role.actorId);
+            command.Parameters.AddWithValue("$filmId", role.filmId);
             long newId = (long)command.ExecuteScalar();
             connection.Close();
             return newId;
@@ -28,51 +27,39 @@ namespace ConsoleProject
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"DELETE FROM films WHERE id = $id";
+            command.CommandText = @"DELETE FROM roles WHERE id = $id";
             command.Parameters.AddWithValue("$id", id);
             int result = command.ExecuteNonQuery();
             connection.Close();
             return result;
         }
-        public int Update(long id, Film film)
+        public Role GetById(int id)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"UPDATE films SET title = $title, genre = $genre, description = $description, releaseYear = $releaseYear WHERE id = $id";
-            command.Parameters.AddWithValue("$title", film.title);
-            command.Parameters.AddWithValue("$genre", film.genre);
-            command.Parameters.AddWithValue("$description", film.description);
-            command.Parameters.AddWithValue("$releaseYear", film.releaseYear);
-            command.Parameters.AddWithValue("$id", id);
-            int result = command.ExecuteNonQuery();
-            connection.Close();
-            return result;
-        }
-        public Film GetById(int id)
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT * FROM films WHERE id = $id";
+            command.CommandText = @"SELECT * FROM roles WHERE id = $id";
             command.Parameters.AddWithValue("$id", id);
             SqliteDataReader reader = command.ExecuteReader();
-            Film film = new Film();
+            Role role = new Role();
             if(reader.Read())
             {
-                film = GetFilm(reader);
+                role = GetRole(reader);
             }
             else
             {
-                film = null;
+                role = null;
             }
             reader.Close();
             connection.Close();
-            return film;
+            return role;
         }
-        public List<Film> GetAll()
+        public List<Film> GetAllFilms(int id)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT * FROM films";
+            command.CommandText = @"SELECT films.id, title, genre, description, releaseYear 
+                                    FROM films, roles WHERE roles.actorId = $id AND roles.filmId = films.id";
+            command.Parameters.AddWithValue("$id", id);
             SqliteDataReader reader = command.ExecuteReader();
             List<Film> films = new List<Film>();
             while(reader.Read())
@@ -83,6 +70,14 @@ namespace ConsoleProject
             reader.Close();
             connection.Close();
             return films;
+        }
+        private static Role GetRole(SqliteDataReader reader)
+        {
+            Role role = new Role();
+            role.id = int.Parse(reader.GetString(0));
+            role.actorId = int.Parse(reader.GetString(1));
+            role.filmId = int.Parse(reader.GetString(2));
+            return role;
         }
         private static Film GetFilm(SqliteDataReader reader)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class User
@@ -9,13 +10,14 @@ namespace ConsoleProject
         public string password;
         public int isModerator;
         public DateTime registrationDate;
+        public List<Review> reviews;
         public User()
         {
             this.id = 0;
             this.username = null;
             this.fullname = null;
             this.password = null;
-            this.isModerator = -1;
+            this.isModerator = 0;
             this.registrationDate = DateTime.MinValue;
         }
         public User(int id, string username, string fullname, string password, int isModerator, DateTime registrationDate)

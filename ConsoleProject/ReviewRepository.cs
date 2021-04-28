@@ -67,17 +67,49 @@ namespace ConsoleProject
             connection.Close();
             return review;
         }
-        public LinkedList<Review> GetAll()
+        public List<Review> GetAll()
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"SELECT * FROM reviews";
             SqliteDataReader reader = command.ExecuteReader();
-            LinkedList<Review> reviews = new LinkedList<Review>();
+            List<Review> reviews = new List<Review>();
             while(reader.Read())
             {
                 Review currentReview = GetReview(reader);
-                reviews.AddLast(currentReview);
+                reviews.Add(currentReview);
+            }
+            reader.Close();
+            connection.Close();
+            return reviews;
+        }
+        public List<Review> GetAllFilmReviews(int id)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM reviews WHERE filmId = $id";
+            SqliteDataReader reader = command.ExecuteReader();
+            List<Review> reviews = new List<Review>();
+            while(reader.Read())
+            {
+                Review currentReview = GetReview(reader);
+                reviews.Add(currentReview);
+            }
+            reader.Close();
+            connection.Close();
+            return reviews;
+        }
+        public List<Review> GetAllUserReviews(int id)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM reviews WHERE userId = $id";
+            SqliteDataReader reader = command.ExecuteReader();
+            List<Review> reviews = new List<Review>();
+            while(reader.Read())
+            {
+                Review currentReview = GetReview(reader);
+                reviews.Add(currentReview);
             }
             reader.Close();
             connection.Close();
@@ -92,5 +124,6 @@ namespace ConsoleProject
             review.postedAt = DateTime.Parse(reader.GetString(3));
             return review;
         }
+        
     }
 }

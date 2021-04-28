@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class Actor
@@ -7,6 +8,7 @@ namespace ConsoleProject
         public string fullname;
         public string country;
         public DateTime birthDate;
+        public Film[] films;
         public Actor()
         {
             this.id = 0;

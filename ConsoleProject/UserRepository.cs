@@ -20,7 +20,7 @@ namespace ConsoleProject
             command.Parameters.AddWithValue("$username", user.username);
             command.Parameters.AddWithValue("$fullname", user.fullname);
             command.Parameters.AddWithValue("$password", user.password);
-            command.Parameters.AddWithValue("$isModerator", user.isModerator);/////
+            command.Parameters.AddWithValue("$isModerator", user.isModerator);
             command.Parameters.AddWithValue("$registrationDate", user.registrationDate.ToString("o"));
             long newId = (long)command.ExecuteScalar();
             connection.Close();
@@ -72,17 +72,17 @@ namespace ConsoleProject
             connection.Close();
             return user;
         }
-        public LinkedList<User> GetAll()
+        public List<User> GetAll()
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"SELECT * FROM users";
             SqliteDataReader reader = command.ExecuteReader();
-            LinkedList<User> users = new LinkedList<User>();
+            List<User> users = new List<User>();
             while(reader.Read())
             {
                 User currentUser = GetUser(reader);
-                users.AddLast(currentUser);
+                users.Add(currentUser);
             }
             reader.Close();
             connection.Close();

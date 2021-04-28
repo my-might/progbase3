@@ -7,6 +7,8 @@ namespace ConsoleProject
         public string opinion;
         public int rating;
         public DateTime postedAt;
+        public int userId;
+        public int filmId;
          public Review()
         {
             this.id = 0;

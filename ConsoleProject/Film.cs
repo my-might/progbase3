@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class Film
@@ -6,7 +7,10 @@ namespace ConsoleProject
         public int id;
         public string title;
         public string genre;
+        public string description;
         public int releaseYear;
+        public List<Review> reviews;
+        public Actor[] actors;
          public Film()
         {
             this.id = 0;
