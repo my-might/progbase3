@@ -12,36 +12,34 @@ namespace ConsoleProject
             while(true)
             {
                 Console.WriteLine(@"Available commands:
-                1. Generate information
-                2. Exit");
+                1. Generate films
+                2. Generate actors
+                3. Generate reviews
+                4. Generate users
+                5. Exit");
                 string command = Console.ReadLine();
+                string generatorPath = "/home/valeria/Desktop/progbase3/data/generator/";
                 if(command == "1")
                 {
-                    string generatorPath = "/home/valeria/Desktop/progbase3/data/generator/";
-                    Console.Write("Type of entity to generate: ");
-                    string entity = Console.ReadLine();
-                    if(entity == "film")
-                    {
-                        FilmRepository repo = new FilmRepository(connection);
-                        ProcessGenerateFilms(generatorPath, repo);
-                    }
-                    else if(entity == "actor")
-                    {
-                        ActorRepository repo = new ActorRepository(connection);
-                        ProcessGenerateActors(generatorPath, repo);
-                    }
-                    else if(entity == "review")
-                    {
-                        ReviewRepository repo = new ReviewRepository(connection);
-                        ProcessGenerateReviews(generatorPath, repo);
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("Error: Unavailable entity.");
-                        continue;
-                    }
+                    FilmRepository repo = new FilmRepository(connection);
+                    ProcessGenerateFilms(generatorPath, repo);
                 }
                 else if(command == "2")
+                {
+                    ActorRepository repo = new ActorRepository(connection);
+                    ProcessGenerateActors(generatorPath, repo);
+                }
+                else if(command == "3")
+                {
+                    ReviewRepository repo = new ReviewRepository(connection);
+                    ProcessGenerateReviews(generatorPath, repo);
+                }
+                else if(command == "4")
+                {
+                    UserRepository repo = new UserRepository(connection);
+                    ProcessGenerateUsers(generatorPath, repo);
+                }
+                else if(command == "5")
                 {
                     Console.WriteLine("End.");
                     break;
@@ -199,6 +197,54 @@ namespace ConsoleProject
                 TimeSpan ts = new TimeSpan((long)(ran.NextDouble() * range.Ticks));
                 review.postedAt = start + ts;
                 repo.Insert(review);
+            }
+            Console.WriteLine("Done!");
+        }
+        static void ProcessGenerateUsers(string generatorPath, UserRepository repo)
+        {
+            int number = GetNumberOfEntities();
+            DateTime start;
+            DateTime end;
+            while(true)
+            {
+                Console.Write("Please, enter start of range of registration datetime to generate: ");
+                string inputStart = Console.ReadLine();
+                if(!DateTime.TryParse(inputStart, out start))
+                {
+                    Console.WriteLine("Error: Registration datetime must be in date format. Try again.");
+                    continue;
+                }
+                Console.Write("Please, enter end of range of registration datetime to generate: ");
+                string inputEnd = Console.ReadLine();
+                if(!DateTime.TryParse(inputEnd, out end))
+                {
+                    Console.WriteLine("Error: Registration datetime must be in date format. Try again.");
+                    continue;
+                }
+                if(end > DateTime.Now)
+                {
+                    Console.WriteLine("Error: End mustn`t be bigger than datetime now. Try again.");
+                    continue;
+                }
+                if(start >= end)
+                {
+                    Console.WriteLine("Error: Start must be less than end. Try again.");
+                    continue;
+                }
+                break;
+            }
+            TimeSpan range = end-start;
+            Console.WriteLine("Data is generating...");
+            for(int i = 0; i<number; i++)
+            {
+                User user = new User();
+                user.username = GenerateFromFile(generatorPath + "usernames.txt");
+                user.fullname = GenerateFromFile(generatorPath + "fullnames.txt");
+                Random ran = new Random();
+                user.password = ran.Next(10000000, 99999999).ToString();
+                TimeSpan ts = new TimeSpan((long)(ran.NextDouble() * range.Ticks));
+                user.registrationDate = start + ts;
+                repo.Insert(user);
             }
             Console.WriteLine("Done!");
         }

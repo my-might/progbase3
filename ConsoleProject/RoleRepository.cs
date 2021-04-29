@@ -71,6 +71,24 @@ namespace ConsoleProject
             connection.Close();
             return films;
         }
+        public List<Actor> GetAllActors(int id)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT actors.id, fullname, country, birthDate 
+                                    FROM actors, roles WHERE roles.filmId = $id AND roles.actorId = actors.id";
+            command.Parameters.AddWithValue("$id", id);
+            SqliteDataReader reader = command.ExecuteReader();
+            List<Actor> actors = new List<Actor>();
+            while(reader.Read())
+            {
+                Actor currentActor = GetActor(reader);
+                actors.Add(currentActor);
+            }
+            reader.Close();
+            connection.Close();
+            return actors;
+        }
         private static Role GetRole(SqliteDataReader reader)
         {
             Role role = new Role();
@@ -88,6 +106,15 @@ namespace ConsoleProject
             film.description = reader.GetString(3);
             film.releaseYear = int.Parse(reader.GetString(4));
             return film;
+        }
+        private static Actor GetActor(SqliteDataReader reader)
+        {
+            Actor actor = new Actor();
+            actor.id = int.Parse(reader.GetString(0));
+            actor.fullname = reader.GetString(1);
+            actor.country = reader.GetString(2);
+            actor.birthDate = DateTime.Parse(reader.GetString(3));
+            return actor;
         }
     }
 }
