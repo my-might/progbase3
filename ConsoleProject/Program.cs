@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Data.Sqlite;
 using System.IO;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     class Program
@@ -18,25 +19,22 @@ namespace ConsoleProject
                 4. Generate users
                 5. Exit");
                 string command = Console.ReadLine();
-                string generatorPath = "/home/valeria/Desktop/progbase3/data/generator/";
+                string generatorPath = "/home/valeria/Desktop/progbase3/data/generator/"; 
+                Service repo = new Service(connection);
                 if(command == "1")
                 {
-                    FilmRepository repo = new FilmRepository(connection);
                     ProcessGenerateFilms(generatorPath, repo);
                 }
                 else if(command == "2")
                 {
-                    ActorRepository repo = new ActorRepository(connection);
                     ProcessGenerateActors(generatorPath, repo);
                 }
                 else if(command == "3")
                 {
-                    ReviewRepository repo = new ReviewRepository(connection);
                     ProcessGenerateReviews(generatorPath, repo);
                 }
                 else if(command == "4")
                 {
-                    UserRepository repo = new UserRepository(connection);
                     ProcessGenerateUsers(generatorPath, repo);
                 }
                 else if(command == "5")
@@ -66,18 +64,47 @@ namespace ConsoleProject
             }
             return result;
         }
-        static void ProcessGenerateFilms(string generatorPath, FilmRepository repo)
+        static void ProcessGenerateFilms(string generatorPath, Service repo)
         {
+            int[] actorsId = repo.actorRepository.GetAllIds();
+            if(actorsId.Length == 0)
+            {
+                Console.WriteLine("Error: Cannot generate films, when database doesn`t contain any actors.");
+                while(true)
+                {
+                    Console.WriteLine("Do you want to generate actors too? (y/n)");
+                    string answer = Console.ReadLine().ToLower();
+                    if(answer == "n")
+                    {
+                        return;
+                    }
+                    else if(answer == "y")
+                    {
+                        Console.WriteLine("Process generating actors:");
+                        ProcessGenerateActors(generatorPath, repo);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Unavailable option. Try again.");
+                        continue;
+                    }
+                }
+            }
+            Console.WriteLine("Process generating films:");
             int number = GetNumberOfEntities();
+            actorsId = repo.actorRepository.GetAllIds();
             int start = 0;
             int end = 0;
+            int minActors = 0;
+            int maxActors = 0;
             while(true)
             {
                 Console.Write("Please, enter start of range of release year to generate: ");
                 string inputStart = Console.ReadLine();
-                if(!int.TryParse(inputStart, out start) || start <= 0)
+                if(!int.TryParse(inputStart, out start) || start < 1895) //1895-first film
                 {
-                    Console.WriteLine("Error: Year must be positive integer. Try again.");
+                    Console.WriteLine("Error: Year must be positive integer and more than 1894. Try again.");
                     continue;
                 }
                 Console.Write("Please, enter end of range of release year to generate: ");
@@ -94,6 +121,29 @@ namespace ConsoleProject
                 }
                 break;
             }
+            while(true)
+            {
+                Console.Write("Please, enter min number of actors to generate for each film: ");
+                string inputStart = Console.ReadLine();
+                if(!int.TryParse(inputStart, out minActors) || start > actorsId.Length || start <= 0)
+                {
+                    Console.WriteLine("Error: Number must be positive integer and available for existing number of actors. Try again.");
+                    continue;
+                }
+                Console.Write("Please, enter max number of actors to generate for each film: ");
+                string inputEnd = Console.ReadLine();
+                if(!int.TryParse(inputEnd, out maxActors) || end <= 0 || end > actorsId.Length)
+                {
+                    Console.WriteLine("Error: Number must be positive integer and available for existing number of actors. Try again.");
+                    continue;
+                }
+                if(start > end)
+                {
+                    Console.WriteLine("Error: Start must be less than end. Try again.");
+                    continue;
+                }
+                break;
+            }
             Console.WriteLine("Data is generating...");
             for(int i = 0; i<number; i++)
             {
@@ -103,11 +153,25 @@ namespace ConsoleProject
                 film.description = GenerateFromFile(generatorPath + "descriptions.txt");
                 Random ran = new Random();
                 film.releaseYear = ran.Next(start, end+1);
-                repo.Insert(film);
+                long filmId = repo.filmRepository.Insert(film);
+                int numberOfActors = ran.Next(minActors, maxActors+1);
+                for(int j = 0; j<numberOfActors; j++)
+                {
+                    int currentActorId = ran.Next(0, actorsId.Length);
+                    if(repo.roleRepository.IsExist(filmId, currentActorId))
+                    {
+                        j--;
+                        continue;
+                    }
+                    Role role = new Role();
+                    role.filmId = (int)filmId;
+                    role.actorId = currentActorId;
+                    repo.roleRepository.Insert(role);
+                }
             }
             Console.WriteLine("Done!");
         }
-        static void ProcessGenerateActors(string generatorPath, ActorRepository repo)
+        static void ProcessGenerateActors(string generatorPath, Service repo)
         {
             int number = GetNumberOfEntities();
             DateTime start;
@@ -130,7 +194,7 @@ namespace ConsoleProject
                 }
                 if(end > DateTime.Now)
                 {
-                    Console.WriteLine("Error: End mustn`t be bigger than datetime now. Try again.");
+                    Console.WriteLine("Error: Birth date mustn`t be bigger than datetime now. Try again.");
                     continue;
                 }
                 if(start >= end)
@@ -149,12 +213,26 @@ namespace ConsoleProject
                 actor.country = GenerateFromFile(generatorPath + "countries.txt");
                 Random ran = new Random();
                 actor.birthDate = start.AddDays(ran.Next(range));
-                repo.Insert(actor);
+                repo.actorRepository.Insert(actor);
             }
             Console.WriteLine("Done!");
         }
-        static void ProcessGenerateReviews(string generatorPath, ReviewRepository repo)
+        static void ProcessGenerateReviews(string generatorPath, Service repo)
         {
+            int[] filmsId = repo.filmRepository.GetAllIds();
+            if(filmsId.Length == 0)
+            {
+                Console.Error.WriteLine("Error: Cannot generate reviews, when database doesn`t contain any films.");
+                return;
+            }
+            int[] usersId = repo.userRepository.GetAllIds();
+            if(usersId.Length == 0)
+            {
+                Console.Error.WriteLine("Error: Cannot generate reviews, when database doesn`t contain any users.");
+                return;
+            }
+            int minYear = repo.filmRepository.GetMinReleaseYear();
+            DateTime minReg = repo.userRepository.GetMinRegistrationDate();
             int number = GetNumberOfEntities();
             DateTime start;
             DateTime end;
@@ -162,9 +240,9 @@ namespace ConsoleProject
             {
                 Console.Write("Please, enter start of range of post datetime to generate: ");
                 string inputStart = Console.ReadLine();
-                if(!DateTime.TryParse(inputStart, out start))
+                if(!DateTime.TryParse(inputStart, out start) || start.Year < minYear || start < minReg)
                 {
-                    Console.WriteLine("Error: Post datetime must be in date format. Try again.");
+                    Console.WriteLine("Error: Post datetime must be in date format and available for films and users. Try again.");
                     continue;
                 }
                 Console.Write("Please, enter end of range of post datetime to generate: ");
@@ -176,10 +254,10 @@ namespace ConsoleProject
                 }
                 if(end > DateTime.Now)
                 {
-                    Console.WriteLine("Error: End mustn`t be bigger than datetime now. Try again.");
+                    Console.WriteLine("Error: Post datetime mustn`t be bigger than datetime now. Try again.");
                     continue;
                 }
-                if(start >= end)
+                if(start > end)
                 {
                     Console.WriteLine("Error: Start must be less than end. Try again.");
                     continue;
@@ -196,11 +274,37 @@ namespace ConsoleProject
                 review.rating = ran.Next(1, 11);
                 TimeSpan ts = new TimeSpan((long)(ran.NextDouble() * range.Ticks));
                 review.postedAt = start + ts;
-                repo.Insert(review);
+                int index = ran.Next(0, filmsId.Length);
+                for(int j = index; j<=filmsId.Length; j++)
+                {
+                    if(j == filmsId.Length)
+                    {
+                        j = -1;
+                    }
+                    else if(repo.filmRepository.GetById(filmsId[j]).releaseYear < review.postedAt.Year)
+                    {
+                        review.filmId = filmsId[j];
+                        break;
+                    }
+                }
+                int userIndex = ran.Next(0, usersId.Length);
+                for(int j = userIndex; j<=usersId.Length; j++)
+                {
+                    if(j == usersId.Length)
+                    {
+                        j = -1;
+                    }
+                    else if(repo.userRepository.GetById(usersId[j]).registrationDate < review.postedAt)
+                    {
+                        review.userId = usersId[j];
+                        break;
+                    }
+                }
+                repo.reviewRepository.Insert(review);
             }
             Console.WriteLine("Done!");
         }
-        static void ProcessGenerateUsers(string generatorPath, UserRepository repo)
+        static void ProcessGenerateUsers(string generatorPath, Service repo)
         {
             int number = GetNumberOfEntities();
             DateTime start;
@@ -209,9 +313,9 @@ namespace ConsoleProject
             {
                 Console.Write("Please, enter start of range of registration datetime to generate: ");
                 string inputStart = Console.ReadLine();
-                if(!DateTime.TryParse(inputStart, out start))
+                if(!DateTime.TryParse(inputStart, out start) || start.Year < 2000)
                 {
-                    Console.WriteLine("Error: Registration datetime must be in date format. Try again.");
+                    Console.WriteLine("Error: Registration datetime must be in date format and not less than 2000 year. Try again.");
                     continue;
                 }
                 Console.Write("Please, enter end of range of registration datetime to generate: ");
@@ -223,10 +327,10 @@ namespace ConsoleProject
                 }
                 if(end > DateTime.Now)
                 {
-                    Console.WriteLine("Error: End mustn`t be bigger than datetime now. Try again.");
+                    Console.WriteLine("Error: Registration datetime mustn`t be bigger than datetime now. Try again.");
                     continue;
                 }
-                if(start >= end)
+                if(start > end)
                 {
                     Console.WriteLine("Error: Start must be less than end. Try again.");
                     continue;
@@ -244,7 +348,7 @@ namespace ConsoleProject
                 user.password = ran.Next(10000000, 99999999).ToString();
                 TimeSpan ts = new TimeSpan((long)(ran.NextDouble() * range.Ticks));
                 user.registrationDate = start + ts;
-                repo.Insert(user);
+                repo.userRepository.Insert(user);
             }
             Console.WriteLine("Done!");
         }

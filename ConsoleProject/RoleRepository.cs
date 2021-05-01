@@ -53,6 +53,27 @@ namespace ConsoleProject
             connection.Close();
             return role;
         }
+        public bool IsExist(long filmId, long actorId)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM roles WHERE filmId = $filmId AND actorId = $actorId";
+            command.Parameters.AddWithValue("$filmId", filmId);
+            command.Parameters.AddWithValue("$actorId", actorId);
+            SqliteDataReader reader = command.ExecuteReader();
+            bool result;
+            if(reader.Read())
+            {
+                result = true;
+            }
+            else
+            {
+                result = false;
+            }
+            reader.Close();
+            connection.Close();
+            return result;
+        }
         public List<Film> GetAllFilms(int id)
         {
             connection.Open();

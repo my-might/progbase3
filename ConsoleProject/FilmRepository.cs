@@ -84,6 +84,43 @@ namespace ConsoleProject
             connection.Close();
             return films;
         }
+        public int[] GetAllIds()
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT id FROM films";
+            SqliteDataReader reader = command.ExecuteReader();
+            List<int> ids = new List<int>();
+            while(reader.Read())
+            {
+                int currentId = int.Parse(reader.GetString(0));
+                ids.Add(currentId);
+            }
+            reader.Close();
+            connection.Close();
+            int[] result = new int[ids.Count];
+            ids.CopyTo(result);
+            return result;
+        }
+        public int GetMinReleaseYear()
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT releaseYear FROM films";
+            SqliteDataReader reader = command.ExecuteReader();
+            int min = 2021;
+            while(reader.Read())
+            {
+                int currentYear = int.Parse(reader.GetString(0));
+                if(currentYear < min)
+                {
+                    min = currentYear;
+                }
+            }
+            reader.Close();
+            connection.Close();
+            return min;
+        }
         private static Film GetFilm(SqliteDataReader reader)
         {
             Film film = new Film();

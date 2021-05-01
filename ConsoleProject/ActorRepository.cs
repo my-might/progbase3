@@ -83,6 +83,24 @@ namespace ConsoleProject
             connection.Close();
             return actors;
         }
+        public int[] GetAllIds()
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT id FROM actors";
+            SqliteDataReader reader = command.ExecuteReader();
+            List<int> ids = new List<int>();
+            while(reader.Read())
+            {
+                int currentId = int.Parse(reader.GetString(0));
+                ids.Add(currentId);
+            }
+            reader.Close();
+            connection.Close();
+            int[] result = new int[ids.Count];
+            ids.CopyTo(result);
+            return result;
+        }
         private static Actor GetActor(SqliteDataReader reader)
         {
             Actor actor = new Actor();

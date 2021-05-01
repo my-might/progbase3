@@ -14,12 +14,14 @@ namespace ConsoleProject
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"INSERT INTO reviews (opinion,rating,postedAt)
-                                    VALUES ($opinion,$rating,$postedAt);
+            command.CommandText = @"INSERT INTO reviews (opinion,rating,postedAt,userId,filmId)
+                                    VALUES ($opinion,$rating,$postedAt,$userId,$filmId);
                                     SELECT last_insert_rowid();";
             command.Parameters.AddWithValue("$opinion", review.opinion);
             command.Parameters.AddWithValue("$rating", review.rating);
             command.Parameters.AddWithValue("$postedAt", review.postedAt.ToString("o"));
+            command.Parameters.AddWithValue("$userId", review.userId);
+            command.Parameters.AddWithValue("$filmId", review.filmId);
             long newId = (long)command.ExecuteScalar();
             connection.Close();
             return newId;
