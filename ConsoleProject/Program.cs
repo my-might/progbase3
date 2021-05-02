@@ -27,7 +27,7 @@ namespace ConsoleProject
                 }
                 else if(command == "2")
                 {
-                    ProcessGenerateActors(generatorPath, repo);
+                    GenerateActors(generatorPath, repo);
                 }
                 else if(command == "3")
                 {
@@ -66,7 +66,10 @@ namespace ConsoleProject
         }
         static void ProcessGenerateFilms(string generatorPath, Service repo)
         {
+            int number = GetNumberOfEntities();
             int[] actorIds = repo.actorRepository.GetAllIds();
+            int minFilm = 0;
+            int maxFilm = 0;
             if(actorIds.Length == 0)
             {
                 Console.WriteLine("Error: Cannot generate films, when database doesn`t contain any actors.");
@@ -81,7 +84,69 @@ namespace ConsoleProject
                     else if(answer == "y")
                     {
                         Console.WriteLine("Process generating actors:");
-                        ProcessGenerateActors(generatorPath, repo);
+                        int numberOfActors = GetNumberOfEntities();
+                        DateTime startBirthDate;
+                        DateTime endBirthDate;
+                        while(true)
+                        {
+                            Console.WriteLine($"Please, enter range of birth date to generate.");
+                            Console.Write("Start: ");
+                            string inputStart = Console.ReadLine();
+                            if(!DateTime.TryParse(inputStart, out startBirthDate))
+                            {
+                                Console.WriteLine("Error: Birth date must be in date format. Try again.");
+                                continue;
+                            }
+                            Console.Write("End: ");
+                            string inputEnd = Console.ReadLine();
+                            if(!DateTime.TryParse(inputEnd, out endBirthDate) || endBirthDate > DateTime.Now)
+                            {
+                                Console.WriteLine("Error: Birth date must be in date format. Try again.");
+                                continue;
+                            }
+                            if(startBirthDate >= endBirthDate)
+                            {
+                                Console.WriteLine("Error: Start must be less than end. Try again.");
+                                continue;
+                            }
+                            break;
+                        }  
+                        while(true)
+                        {
+                            Console.WriteLine($"Please, enter range of number of films to generate for each actor.(from 1 to {number})");
+                            Console.Write("Min: ");
+                            string inputStart = Console.ReadLine();
+                            if(!int.TryParse(inputStart, out minFilm) || minFilm > number || minFilm <= 0)
+                            {
+                                Console.WriteLine("Error: Number must be positive integer and available for borders. Try again.");
+                                continue;
+                            }
+                            Console.Write("Max: ");
+                            string inputEnd = Console.ReadLine();
+                            if(!int.TryParse(inputEnd, out maxFilm) || maxFilm <= 0 || maxFilm > number)
+                            {
+                                Console.WriteLine("Error: Number must be positive integer and available for borders. Try again.");
+                                continue;
+                            }
+                            if(minFilm > maxFilm)
+                            {
+                                Console.WriteLine("Error: Start must be less than end. Try again.");
+                                continue;
+                            }
+                            break;
+                        }
+                        int range = (endBirthDate-startBirthDate).Days;
+                        Console.WriteLine("Data is generating...");
+                        for(int i = 0; i<numberOfActors; i++)
+                        {
+                            Actor actor = new Actor();
+                            actor.fullname = GenerateFromFile(generatorPath + "fullnames.txt");
+                            actor.country = GenerateFromFile(generatorPath + "countries.txt");
+                            Random ran = new Random();
+                            actor.birthDate = startBirthDate.AddDays(ran.Next(range));
+                            repo.actorRepository.Insert(actor);
+                        }
+                        Console.WriteLine("Done!");
                         break;
                     }
                     else
@@ -92,7 +157,6 @@ namespace ConsoleProject
                 }
             }
             Console.WriteLine("Process generating films:");
-            int number = GetNumberOfEntities();
             actorIds = repo.actorRepository.GetAllIds();
             int start = 0;
             int end = 0;
@@ -139,7 +203,7 @@ namespace ConsoleProject
                     Console.WriteLine("Error: Number must be positive integer and available for borders. Try again.");
                     continue;
                 }
-                if(start > end)
+                if(minActors > maxActors)
                 {
                     Console.WriteLine("Error: Start must be less than end. Try again.");
                     continue;
@@ -157,36 +221,69 @@ namespace ConsoleProject
                 film.releaseYear = ran.Next(start, end+1);
                 long filmId = repo.filmRepository.Insert(film);
                 int numberOfActors = ran.Next(minActors, maxActors+1);
-                CreateRelations(numberOfActors, filmId, actorIds, repo);
+                CreateRelationFilmActor(numberOfActors, filmId, actorIds, repo);
+            }
+            int[] filmIds = repo.filmRepository.GetAllIds();
+            for(int i = 0; i<actorIds.Length; i++)
+            {
+                Random ran = new Random();
+                int actorId = actorIds[i];
+                int numberOfFilms = ran.Next(minFilm, maxFilm+1);
+                CreateRelationActorFilm(numberOfFilms, actorId, filmIds, repo);
             }
             Console.WriteLine("Done!");
         }
-        static void CreateRelations(int numberOfActors, long filmId, int[] actorIds, Service repo)
+        static void CreateRelationFilmActor(int numberOfEntities, long id, int[] toGenerateIds, Service repo)
         {
             Random ran = new Random();
-            for(int i = 0; i<numberOfActors; i++)
+            for(int i = 0; i<numberOfEntities; i++)
             {
-                int index = ran.Next(0, actorIds.Length);
-                for(int j = index; j<=actorIds.Length; j++)
+                int index = ran.Next(0, toGenerateIds.Length);
+                for(int j = index; j<=toGenerateIds.Length; j++)
                 {
-                    if(index == actorIds.Length)
+                    if(index == toGenerateIds.Length)
                     {
                         j = -1;
                         continue;
                     }
-                    else if(repo.roleRepository.IsExist(filmId, (long)actorIds[index]))
+                    else if(repo.roleRepository.IsExist(id, (long)toGenerateIds[index]))
                     {
-                        continue;
+                        break;
                     }
                     Role role = new Role();
-                    role.filmId = (int)filmId;
-                    role.actorId = actorIds[index];
+                    role.filmId = (int)id;
+                    role.actorId = toGenerateIds[index];
                     repo.roleRepository.Insert(role);
                     break;
                 }
             }
         }
-        static void ProcessGenerateActors(string generatorPath, Service repo)
+        static void CreateRelationActorFilm(int numberOfEntities, long id, int[] toGenerateIds, Service repo)
+        {
+            Random ran = new Random();
+            for(int i = 0; i<numberOfEntities; i++)
+            {
+                int index = ran.Next(0, toGenerateIds.Length);
+                for(int j = index; j<=toGenerateIds.Length; j++)
+                {
+                    if(index == toGenerateIds.Length)
+                    {
+                        j = -1;
+                        continue;
+                    }
+                    else if(repo.roleRepository.IsExist((long)toGenerateIds[index], id))
+                    {
+                        continue;
+                    }
+                    Role role = new Role();
+                    role.filmId = toGenerateIds[index];
+                    role.actorId = (int)id;
+                    repo.roleRepository.Insert(role);
+                    break;
+                }
+            }
+        }
+        static void GenerateActors(string generatorPath, Service repo)
         {
             int number = GetNumberOfEntities();
             DateTime start;
@@ -214,7 +311,7 @@ namespace ConsoleProject
                     continue;
                 }
                 break;
-            }
+            }  
             int range = (end-start).Days;
             Console.WriteLine("Data is generating...");
             for(int i = 0; i<number; i++)
