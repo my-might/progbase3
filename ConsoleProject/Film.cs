@@ -17,6 +17,7 @@ namespace ConsoleProject
             this.title = null;
             this.genre = null;
             this.releaseYear = 0;
+            this.reviews = new List<Review>();
         }
         public Film(int id, string title, string genre, int releaseYear)
         {

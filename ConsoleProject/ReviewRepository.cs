@@ -90,6 +90,7 @@ namespace ConsoleProject
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"SELECT * FROM reviews WHERE filmId = $id";
+            command.Parameters.AddWithValue("$id", id);
             SqliteDataReader reader = command.ExecuteReader();
             List<Review> reviews = new List<Review>();
             while(reader.Read())
@@ -106,6 +107,7 @@ namespace ConsoleProject
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"SELECT * FROM reviews WHERE userId = $id";
+            command.Parameters.AddWithValue("$id", id);
             SqliteDataReader reader = command.ExecuteReader();
             List<Review> reviews = new List<Review>();
             while(reader.Read())

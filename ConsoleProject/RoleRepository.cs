@@ -53,6 +53,38 @@ namespace ConsoleProject
             connection.Close();
             return role;
         }
+        public int CountByActorId(int id)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM roles WHERE actorId = $id";
+            command.Parameters.AddWithValue("$id", id);
+            SqliteDataReader reader = command.ExecuteReader();
+            int result = 0;
+            while(reader.Read())
+            {
+                result++;
+            }
+            reader.Close();
+            connection.Close();
+            return result;
+        }
+        public int CountByFilmId(int id)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM roles WHERE filmId = $id";
+            command.Parameters.AddWithValue("$id", id);
+            SqliteDataReader reader = command.ExecuteReader();
+            int result = 0;
+            while(reader.Read())
+            {
+                result++;
+            }
+            reader.Close();
+            connection.Close();
+            return result;
+        }
         public bool IsExist(long filmId, long actorId)
         {
             connection.Open();
@@ -110,6 +142,26 @@ namespace ConsoleProject
             connection.Close();
             return actors;
         }
+        public List<Film> GetForImage(int id)
+        {
+            List<Film> films = GetAllFilms(id);
+            foreach(Film film in films)
+            {
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = @"SELECT * FROM reviews WHERE filmId = $id ORDER BY postedAt";
+                command.Parameters.AddWithValue("$id", film.id);
+                SqliteDataReader reader = command.ExecuteReader();
+                while(reader.Read())
+                {
+                    Review currentReview = GetReview(reader);
+                    film.reviews.Add(currentReview);
+                }
+                reader.Close();
+                connection.Close();
+            }
+            return films;
+        }
         private static Role GetRole(SqliteDataReader reader)
         {
             Role role = new Role();
@@ -136,6 +188,15 @@ namespace ConsoleProject
             actor.country = reader.GetString(2);
             actor.birthDate = DateTime.Parse(reader.GetString(3));
             return actor;
+        }
+        private static Review GetReview(SqliteDataReader reader)
+        {
+            Review review = new Review();
+            review.id = int.Parse(reader.GetString(0));
+            review.opinion = reader.GetString(1);
+            review.rating = int.Parse(reader.GetString(2));
+            review.postedAt = DateTime.Parse(reader.GetString(3));
+            return review;
         }
     }
 }
