@@ -24,6 +24,22 @@ namespace ConsoleProject
             connection.Close();
             return newId;
         }
+        public void InsertImported(Film film)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"INSERT INTO films (id,title,genre,description,releaseYear,isImported)
+                                    VALUES ($id,$title,$genre,$description,$releaseYear,$isImported);
+                                    SELECT last_insert_rowid();";
+            command.Parameters.AddWithValue("$id", film.id);
+            command.Parameters.AddWithValue("$title", film.title);
+            command.Parameters.AddWithValue("$genre", film.genre);
+            command.Parameters.AddWithValue("$description", film.description);
+            command.Parameters.AddWithValue("$releaseYear", film.releaseYear);
+            command.Parameters.AddWithValue("$isImported", "imported");
+            long newId = (long)command.ExecuteScalar();
+            connection.Close();
+        }
         public int DeleteById(int id)
         {
             connection.Open();

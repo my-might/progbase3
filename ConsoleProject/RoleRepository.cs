@@ -152,6 +152,7 @@ namespace ConsoleProject
                 command.CommandText = @"SELECT * FROM reviews WHERE filmId = $id ORDER BY postedAt";
                 command.Parameters.AddWithValue("$id", film.id);
                 SqliteDataReader reader = command.ExecuteReader();
+                film.reviews = new List<Review>();
                 while(reader.Read())
                 {
                     Review currentReview = GetReview(reader);

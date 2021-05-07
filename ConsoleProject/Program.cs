@@ -40,10 +40,16 @@ namespace ConsoleProject
                 }
                 else if(command == "4")
                 {
-                    ProcessGenerateUsers(generatorPath, repo);
+                    //ProcessGenerateUsers(generatorPath, repo);
+                    Xml xml = new Xml(connection);
+                    List<Film> films = repo.roleRepository.GetAllFilms(1);
+                    xml.ExportData(films, "./export.xml");
+                    Console.WriteLine("End.");
                 }
                 else if(command == "5")
                 {
+                    Xml xml = new Xml(connection);
+                    xml.ImportData("./export.xml");
                     Console.WriteLine("End.");
                     break;
                 }
