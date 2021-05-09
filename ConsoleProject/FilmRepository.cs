@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using System;
 namespace ConsoleProject
 {
     public class FilmRepository
@@ -95,6 +96,39 @@ namespace ConsoleProject
             {
                 Film currentFilm = GetFilm(reader);
                 films.Add(currentFilm);
+            }
+            reader.Close();
+            connection.Close();
+            return films;
+        }
+        public long GetCount()
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM films";
+            long result = (long)command.ExecuteScalar();
+            connection.Close();
+            return result;
+        }
+        public int GetTotalPages()
+        {
+            const int pageSize = 10;
+            return (int)Math.Ceiling(GetCount() / (double)pageSize);
+        }
+        public List<Film> GetPage(int p)
+        {
+            connection.Open();
+            const int pageSize = 10;
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM films LIMIT $pageSize OFFSET $offset";
+            command.Parameters.AddWithValue("$pageSize",pageSize);
+            command.Parameters.AddWithValue("offset",pageSize*(p-1));
+            List<Film> films = new List<Film>();
+            SqliteDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Film film = GetFilm(reader);
+                films.Add(film);
             }
             reader.Close();
             connection.Close();

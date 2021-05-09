@@ -6,7 +6,7 @@ namespace ConsoleProject
     public class UserInterface
     {
         static Service repo;
-        public static void Process()
+        public static void MainWindow()
         {
            string dataBaseFile = "/home/valeria/Desktop/progbase3/data/data.db";
             SqliteConnection connection = new SqliteConnection($"Data Source = {dataBaseFile}");
@@ -35,7 +35,7 @@ namespace ConsoleProject
             Button addEntity = new Button(2, 4, "Create new entity");
             addEntity.Clicked += ProcessClickCreate;
             Button showAllEntity = new Button(2, 6, "View all entities");
-            showAllEntity.Clicked += ProcessClickShowAll;
+            showAllEntity.Clicked += ProcessClickViewAll;
             Button showEntity = new Button(2, 8, "View entity");
             showEntity.Clicked += ProcessClickShow;
             Button removeEntity = new Button(2, 10, "Remove entity");
@@ -47,11 +47,11 @@ namespace ConsoleProject
             top.Add(win, menu);
             Application.Run();
         }
-        private static void OnQuit()
+        static void OnQuit()
         {
             Application.RequestStop();
         }
-        private static void ProcessClickCreate()
+        static void ProcessClickCreate()
         {
             Window win = new Window("Select entity")
             {
@@ -70,6 +70,27 @@ namespace ConsoleProject
             cancel.Clicked += OnQuit;
 
             win.Add(addFilm, addActor, addReview, cancel);
+            Application.Run(win);
+        }
+        static void ProcessClickViewAll()
+        {
+            Window win = new Window("Select entity")
+            {
+                X = 30,
+                Y = 6,
+                Width = 20,
+                Height = 10
+            };
+            Button showFilms = new Button(4, 1, "Films");
+            showFilms.Clicked += ClickShowAllFilms;
+            Button showActors = new Button(4, 2, "Actors");
+            showActors.Clicked += ClickShowAllActors;
+            Button showReviews = new Button(4, 3, "Reviews");
+            showReviews.Clicked += ClickShowAllReviews;
+            Button cancel = new Button(4, 7, "Cancel");
+            cancel.Clicked += OnQuit;
+
+            win.Add(showFilms, showActors, showReviews, cancel);
             Application.Run(win);
         }
         static void ClickCreateFilm()
@@ -102,17 +123,20 @@ namespace ConsoleProject
                 repo.reviewRepository.Insert(review);
             }
         }
-        private static void ProcessClickShowAll()
+        static void ClickShowAllFilms()
         {
-            Window win = new Window("Select entity to view")
-            {
-                X = 30,
-                Y = 6,
-                Width = 20,
-                Height = 10
-            };
-            Application.Top.Add(win);
-            Application.Run();
+            ShowAllFilmsDialog dialog = new ShowAllFilmsDialog(repo);
+            Application.Run(dialog);
+        }
+        static void ClickShowAllActors()
+        {
+            ShowAllActorsDialog dialog = new ShowAllActorsDialog(repo);
+            Application.Run(dialog);
+        }
+        static void ClickShowAllReviews()
+        {
+            ShowAllReviewsDialog dialog = new ShowAllReviewsDialog(repo);
+            Application.Run(dialog);
         }
         private static void ProcessClickShow()
         {

@@ -85,6 +85,39 @@ namespace ConsoleProject
             connection.Close();
             return reviews;
         }
+        public long GetCount()
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM reviews";
+            long result = (long)command.ExecuteScalar();
+            connection.Close();
+            return result;
+        }
+        public int GetTotalPages()
+        {
+            const int pageSize = 10;
+            return (int)Math.Ceiling(GetCount() / (double)pageSize);
+        }
+        public List<Review> GetPage(int p)
+        {
+            connection.Open();
+            const int pageSize = 10;
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM reviews LIMIT $pageSize OFFSET $offset";
+            command.Parameters.AddWithValue("$pageSize",pageSize);
+            command.Parameters.AddWithValue("offset",pageSize*(p-1));
+            List<Review> reviews = new List<Review>();
+            SqliteDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Review review = GetReview(reader);
+                reviews.Add(review);
+            }
+            reader.Close();
+            connection.Close();
+            return reviews;
+        }
         public List<Review> GetAllFilmReviews(int id)
         {
             connection.Open();

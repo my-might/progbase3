@@ -83,6 +83,39 @@ namespace ConsoleProject
             connection.Close();
             return actors;
         }
+        public long GetCount()
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM actors";
+            long result = (long)command.ExecuteScalar();
+            connection.Close();
+            return result;
+        }
+        public int GetTotalPages()
+        {
+            const int pageSize = 10;
+            return (int)Math.Ceiling(GetCount() / (double)pageSize);
+        }
+        public List<Actor> GetPage(int p)
+        {
+            connection.Open();
+            const int pageSize = 10;
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM actors LIMIT $pageSize OFFSET $offset";
+            command.Parameters.AddWithValue("$pageSize",pageSize);
+            command.Parameters.AddWithValue("offset",pageSize*(p-1));
+            List<Actor> actors = new List<Actor>();
+            SqliteDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Actor actor = GetActor(reader);
+                actors.Add(actor);
+            }
+            reader.Close();
+            connection.Close();
+            return actors;
+        }
         public int[] GetAllIds()
         {
             connection.Open();
