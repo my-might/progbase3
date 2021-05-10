@@ -6,13 +6,12 @@ namespace ConsoleProject
     public class CreateReviewDialog : Dialog
     {
         public bool canceled;
-        private TextField inputOpinion;
-        private TextField inputRating;
-        private TextField inputFilmId;
-        private Service repo;
-        public CreateReviewDialog(Service repo)
+        protected TextField inputOpinion;
+        protected TextField inputRating;
+        protected TextField inputFilmId;
+        protected FilmRepository repo;
+        public CreateReviewDialog()
         {
-            this.repo = repo;
             this.Title = "Create review";
             Button ok = new Button("OK");
             ok.Clicked += DialogSubmit;
@@ -41,6 +40,10 @@ namespace ConsoleProject
                 X = 20, Y = Pos.Top(reviewFilmId), Width = Dim.Percent(50)
             };
             this.Add(reviewFilmId, inputFilmId);
+        }
+        public void SetRepository(FilmRepository repo)
+        {
+            this.repo = repo;
         }
         public Review GetReview()
         {
@@ -78,7 +81,7 @@ namespace ConsoleProject
             {
                 errorText = "Film id must be integer.";
             }
-            else if(repo.filmRepository.GetById(id) == null)
+            else if(repo.GetById(id) == null)
             {
                 errorText = "Entered film id does not exist in the database.";
             }

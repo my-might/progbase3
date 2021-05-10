@@ -159,6 +159,7 @@ namespace ConsoleProject
             review.opinion = reader.GetString(1);
             review.rating = int.Parse(reader.GetString(2));
             review.postedAt = DateTime.Parse(reader.GetString(3));
+            review.filmId = int.Parse(reader.GetString(4));
             return review;
         }
         

@@ -1,14 +1,14 @@
 using Terminal.Gui;
-using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
 namespace ConsoleProject
 {
     public class UserInterface
     {
         static Service repo;
+        static TextField idToShow;
         public static void MainWindow()
         {
-           string dataBaseFile = "/home/valeria/Desktop/progbase3/data/data.db";
+            string dataBaseFile = "/home/valeria/Desktop/progbase3/data/data.db";
             SqliteConnection connection = new SqliteConnection($"Data Source = {dataBaseFile}");
             repo = new Service(connection);
             Application.Init();
@@ -38,12 +38,10 @@ namespace ConsoleProject
             showAllEntity.Clicked += ProcessClickViewAll;
             Button showEntity = new Button(2, 8, "View entity");
             showEntity.Clicked += ProcessClickShow;
-            Button removeEntity = new Button(2, 10, "Remove entity");
-            removeEntity.Clicked += ProcessClickRemove;
-            Button editEntity = new Button(2, 12, "Edit entity");
+            Button editEntity = new Button(2, 10, "Edit entity");
             editEntity.Clicked += ProcessClickEdit;
 
-            win.Add(addEntity, showAllEntity, showEntity, removeEntity, editEntity);
+            win.Add(addEntity, showAllEntity, showEntity, editEntity);
             top.Add(win, menu);
             Application.Run();
         }
@@ -115,7 +113,8 @@ namespace ConsoleProject
         }
         static void ClickCreateReview()
         {
-            CreateReviewDialog dialog = new CreateReviewDialog(repo);
+            CreateReviewDialog dialog = new CreateReviewDialog();
+            dialog.SetRepository(repo.filmRepository);
             Application.Run(dialog);
             if(!dialog.canceled)
             {
@@ -125,30 +124,277 @@ namespace ConsoleProject
         }
         static void ClickShowAllFilms()
         {
-            ShowAllFilmsDialog dialog = new ShowAllFilmsDialog(repo);
+            ShowAllFilmsDialog dialog = new ShowAllFilmsDialog();
+            dialog.SetRepository(repo.filmRepository);
             Application.Run(dialog);
         }
         static void ClickShowAllActors()
         {
-            ShowAllActorsDialog dialog = new ShowAllActorsDialog(repo);
+            ShowAllActorsDialog dialog = new ShowAllActorsDialog();
+            dialog.SetRepository(repo.actorRepository);
             Application.Run(dialog);
         }
         static void ClickShowAllReviews()
         {
-            ShowAllReviewsDialog dialog = new ShowAllReviewsDialog(repo);
+            ShowAllReviewsDialog dialog = new ShowAllReviewsDialog();
+            dialog.SetRepository(repo.reviewRepository);
             Application.Run(dialog);
         }
         private static void ProcessClickShow()
         {
+            Window win = new Window("Select entity")
+            {
+                X = 30,
+                Y = 6,
+                Width = Dim.Percent(30),
+                Height = 12
+            };
+            Label idLabel = new Label(4, 2, "ID:");
+            idToShow = new TextField("")
+            {
+                X = 8, Y = 2, Width = Dim.Percent(40)
+            };
+            Button showFilms = new Button(4, 3, "Films");
+            showFilms.Clicked += ClickShowFilm;
+            Button showActors = new Button(4, 4, "Actors");
+            showActors.Clicked += ClickShowActor;
+            Button showReviews = new Button(4, 5, "Reviews");
+            showReviews.Clicked += ClickShowAllReviews;
+            Button cancel = new Button(4, 9, "Cancel");
+            cancel.Clicked += OnQuit;
 
+            win.Add(idLabel, idToShow, showFilms, showActors, showReviews, cancel);
+            Application.Run(win);
         }
-        private static void ProcessClickRemove()
+        static void ClickShowFilm()
         {
-
+            string errorText = "";
+            int id = 0;
+            if(idToShow.Text.ToString() == "")
+            {
+                errorText = "ID field mustn`t be empty.";
+            }
+            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
+            {
+                errorText = "ID must be positive integer.";
+            }
+            else if(repo.filmRepository.GetById(id) == null)
+            {
+                errorText = $"Film with id [{id}] doesn`t exist.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+                return;
+            }
+            else
+            {
+                ShowFilmDialog dialog = new ShowFilmDialog();
+                dialog.SetFilm(repo.filmRepository.GetById(id));
+                Application.Run(dialog);
+                if(dialog.deleted)
+                {
+                    repo.filmRepository.DeleteById(id);
+                }
+                if(dialog.updated)
+                {
+                    repo.filmRepository.Update((long) id, dialog.GetFilm());
+                }
+            }
+        }
+        static void ClickShowActor()
+        {
+            string errorText = "";
+            int id = 0;
+            if(idToShow.Text.ToString() == "")
+            {
+                errorText = "ID field mustn`t be empty.";
+            }
+            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
+            {
+                errorText = "ID must be positive integer.";
+            }
+            else if(repo.actorRepository.GetById(id) == null)
+            {
+                errorText = $"Actor with id [{id}] doesn`t exist.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+                return;
+            }
+            else
+            {
+                ShowActorDialog dialog = new ShowActorDialog();
+                dialog.SetActor(repo.actorRepository.GetById(id));
+                Application.Run(dialog);
+                if(dialog.deleted)
+                {
+                    repo.actorRepository.DeleteById(id);
+                }
+                if(dialog.updated)
+                {
+                    repo.actorRepository.Update((long) id, dialog.GetActor());
+                }
+            }
+        }
+        static void ClickShowReview()
+        {
+            string errorText = "";
+            int id = 0;
+            if(idToShow.Text.ToString() == "")
+            {
+                errorText = "ID field mustn`t be empty.";
+            }
+            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
+            {
+                errorText = "ID must be positive integer.";
+            }
+            else if(repo.reviewRepository.GetById(id) == null)
+            {
+                errorText = $"Review with id [{id}] doesn`t exist.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+                return;
+            }
+            else
+            {
+                ShowReviewDialog dialog = new ShowReviewDialog();
+                dialog.SetReview(repo.reviewRepository.GetById(id));
+                Application.Run(dialog);
+                if(dialog.deleted)
+                {
+                    repo.reviewRepository.DeleteById(id);
+                }
+                if(dialog.updated)
+                {
+                    repo.reviewRepository.Update((long) id, dialog.GetReview());
+                }
+            }
         }
         private static void ProcessClickEdit()
         {
+            Window win = new Window("Select entity")
+            {
+                X = 30,
+                Y = 6,
+                Width = Dim.Percent(30),
+                Height = 12
+            };
+            Label idLabel = new Label(4, 2, "ID:");
+            idToShow = new TextField("")
+            {
+                X = 8, Y = 2, Width = Dim.Percent(40)
+            };
+            Button editFilm = new Button(4, 3, "Film");
+            editFilm.Clicked += ClickEditFilm;
+            Button editActor = new Button(4, 4, "Actor");
+            editActor.Clicked += ClickEditActor;
+            Button editReview = new Button(4, 5, "Review");
+            editReview.Clicked += ClickEditReview;
+            Button cancel = new Button(4, 9, "Cancel");
+            cancel.Clicked += OnQuit;
 
+            win.Add(idLabel, idToShow, editFilm, editActor, editReview, cancel);
+            Application.Run(win);
+        }
+        static void ClickEditFilm()
+        {
+            string errorText = "";
+            int id = 0;
+            if(idToShow.Text.ToString() == "")
+            {
+                errorText = "ID field mustn`t be empty.";
+            }
+            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
+            {
+                errorText = "ID must be positive integer.";
+            }
+            else if(repo.filmRepository.GetById(id) == null)
+            {
+                errorText = $"Film with id [{id}] doesn`t exist.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+                return;
+            }
+            else
+            {
+                EditFilmDialog dialog = new EditFilmDialog();
+                dialog.SetFilm(repo.filmRepository.GetById(id));
+                Application.Run(dialog);
+                if(!dialog.canceled)
+                {
+                    repo.filmRepository.Update((long)id, dialog.GetFilm());
+                }
+            }
+        }
+        static void ClickEditActor()
+        {
+            string errorText = "";
+            int id = 0;
+            if(idToShow.Text.ToString() == "")
+            {
+                errorText = "ID field mustn`t be empty.";
+            }
+            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
+            {
+                errorText = "ID must be positive integer.";
+            }
+            else if(repo.actorRepository.GetById(id) == null)
+            {
+                errorText = $"Actor with id [{id}] doesn`t exist.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+                return;
+            }
+            else
+            {
+                EditActorDialog dialog = new EditActorDialog();
+                dialog.SetActor(repo.actorRepository.GetById(id));
+                Application.Run(dialog);
+                if(!dialog.canceled)
+                {
+                    repo.actorRepository.Update((long) id, dialog.GetActor());
+                }
+            }
+        }
+        static void ClickEditReview()
+        {
+            string errorText = "";
+            int id = 0;
+            if(idToShow.Text.ToString() == "")
+            {
+                errorText = "ID field mustn`t be empty.";
+            }
+            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
+            {
+                errorText = "ID must be positive integer.";
+            }
+            else if(repo.reviewRepository.GetById(id) == null)
+            {
+                errorText = $"Review with id [{id}] doesn`t exist.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+                return;
+            }
+            else
+            {
+                EditReviewDialog dialog = new EditReviewDialog();
+                dialog.SetReview(repo.reviewRepository.GetById(id));
+                Application.Run(dialog);
+                if(!dialog.canceled)
+                {
+                    repo.reviewRepository.Update((long) id, dialog.GetReview());
+                }
+            }
         }
     }
 }

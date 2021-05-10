@@ -4,45 +4,47 @@ namespace ConsoleProject
 {
     public class ShowAllFilmsDialog : Dialog
     {
-        private Service repo;
+        private FilmRepository repo;
         private int page = 1;
         private Label totalPagesLabel;
         private Label currentPageLabel;
+        private TextField searchPage;
         private ListView allFilms;
-        public ShowAllFilmsDialog(Service repo)
+        public ShowAllFilmsDialog()
         {
-            this.repo = repo;
             Button ok = new Button("OK");
             ok.Clicked += DialogCanceled;
+            this.AddButton(ok);
             allFilms = new ListView(new List<Film>())
             {
                 Width = Dim.Fill(),
                 Height = Dim.Fill()
             };
-            //allFilms.OpenSelectedItem += ;
+            allFilms.OpenSelectedItem += OnOpenFilm;
             Label title = new Label("Films list")
             {
                 X = Pos.Center(), Y = 0
             };
             Button prevPage = new Button("Prev")
             {
-                X = Pos.Center() - 20, Y = 2
+                X = Pos.Center() - 28, Y = 2
             };
             prevPage.Clicked += ClickPrevPage;
             Button nextPage = new Button("Next")
             {
-                X = Pos.Center() + 15, Y = 2
+                X = Pos.Center() + 20, Y = 2
             };
             nextPage.Clicked += ClickNextPage;
-            currentPageLabel = new Label("")
+            currentPageLabel = new Label("?")
             {
-                X = Pos.Right(prevPage) + 3, Y = 2
+                X = Pos.Right(prevPage) + 4, Y = 2,
+                Width = 5
             };
-            totalPagesLabel = new Label("")
+            totalPagesLabel = new Label("?")
             {
-                X = Pos.Left(nextPage) - 3, Y = 2
+                X = Pos.Left(nextPage) - 6, Y = 2,
+                Width = 5
             };
-            ShowCurrentPage();
             FrameView frameView = new FrameView("")
             {
                 X = 3, Y = 3,
@@ -50,7 +52,68 @@ namespace ConsoleProject
                 Height = 12
             };
             frameView.Add(allFilms);
-            this.Add(ok, title, prevPage, nextPage, currentPageLabel, totalPagesLabel, frameView);
+            searchPage = new TextField("")
+            {
+                X = Pos.Center(), Y = 2,
+                Width = Dim.Percent(10)
+            };
+            searchPage.KeyPress += OnSearchEnter;
+            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, frameView, searchPage);
+        }
+        private void OnOpenFilm(ListViewItemEventArgs args)
+        {
+            Film film = (Film)args.Value;
+            ShowFilmDialog dialog = new ShowFilmDialog();
+            dialog.SetFilm(film);
+            Application.Run(dialog);
+            if(dialog.deleted)
+            {
+                repo.DeleteById(film.id);
+            }
+            if(page > repo.GetTotalPages() && page > 1)
+            {
+                page--;
+            }
+            if(dialog.updated)
+            {
+                repo.Update((long)film.id, dialog.GetFilm());
+            }
+            ShowCurrentPage();
+        }
+        private void OnSearchEnter(KeyEventEventArgs args)
+        {
+            string errorText = "";
+            int toPage = 0;
+            if(args.KeyEvent.Key != Key.Enter)
+            {
+                return;
+            }
+            if(searchPage.Text.ToString() == "")
+            {
+                errorText = "Field is empty.";
+            }
+            else if(!int.TryParse(searchPage.Text.ToString(), out toPage))
+            {
+                errorText = "Page must be integer.";
+            }
+            else if(toPage < 1 || toPage > repo.GetTotalPages())
+            {
+                errorText = "Page is out of range.";
+            }
+            if(errorText != "")
+            {
+                MessageBox.ErrorQuery("Error", errorText, "OK");
+            }
+            else 
+            {
+                this.page = toPage;
+                ShowCurrentPage();
+            }
+        }
+        public void SetRepository(FilmRepository repo)
+        {
+            this.repo = repo;
+            ShowCurrentPage();
         }
         private void ClickPrevPage()
         {
@@ -58,24 +121,24 @@ namespace ConsoleProject
             {
                 return;
             }
-            page--;
+            this.page--;
             ShowCurrentPage();
         }
         private void ClickNextPage()
         {
-            int totalPages = repo.filmRepository.GetTotalPages();
+            int totalPages = repo.GetTotalPages();
             if(page == totalPages)
             {
                 return;
             }
-            page++;
+            this.page++;
             ShowCurrentPage();
         }
         private void ShowCurrentPage()
         {
             this.currentPageLabel.Text = this.page.ToString();
-            this.totalPagesLabel.Text = repo.filmRepository.GetTotalPages().ToString();
-            this.allFilms.SetSource(repo.filmRepository.GetPage(page));
+            this.totalPagesLabel.Text = repo.GetTotalPages().ToString();
+            this.allFilms.SetSource(repo.GetPage(page));
         }
         private void DialogCanceled()
         {

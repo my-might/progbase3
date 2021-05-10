@@ -5,10 +5,10 @@ namespace ConsoleProject
     public class CreateFilmDialog : Dialog
     {
         public bool canceled;
-        private TextField inputTitle;
-        private TextField inputGenre;
-        private TextField inputDescription;
-        private TextField inputRelease;
+        protected TextField inputTitle;
+        protected TextField inputGenre;
+        protected TextField inputDescription;
+        protected TextField inputRelease;
         public CreateFilmDialog()
         {
             this.Title = "Create film";

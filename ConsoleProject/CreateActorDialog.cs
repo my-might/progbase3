@@ -5,9 +5,9 @@ namespace ConsoleProject
     public class CreateActorDialog : Dialog
     {
         public bool canceled;
-        private TextField inputFullname;
-        private TextField inputCountry;
-        private DateField inputBirthDate;
+        protected TextField inputFullname;
+        protected TextField inputCountry;
+        protected DateField inputBirthDate;
         public CreateActorDialog()
         {
             this.Title = "Create actor";
