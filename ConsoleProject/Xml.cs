@@ -6,10 +6,10 @@ namespace ConsoleProject
 {
     public class Xml
     {
-        private SqliteConnection connection;
-        public Xml(SqliteConnection connection)
+        private FilmRepository repo;
+        public Xml(FilmRepository repo)
         {
-            this.connection = connection;
+            this.repo = repo;
         }
         public void ExportData(List<Film> films, string filePath)
         {
@@ -26,7 +26,6 @@ namespace ConsoleProject
             StringReader reader = new StringReader(xmlData);
             List<Film> films = (List<Film>)ser.Deserialize(reader);
             reader.Close();
-            FilmRepository repo = new FilmRepository(connection);
             foreach(Film film in films)
             {
                 if(repo.GetById(film.id) == null)

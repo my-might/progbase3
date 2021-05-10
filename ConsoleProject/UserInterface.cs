@@ -16,7 +16,7 @@ namespace ConsoleProject
 
             MenuBar menu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem ("_File", new MenuItem [] {
-                    new MenuItem ("_Export Films", "", null),
+                    new MenuItem ("_Export Films", "", Export),
                     new MenuItem ("_Import Films", "", null),
                     new MenuItem ("_Exit", "", OnQuit)
                 }),
@@ -48,6 +48,17 @@ namespace ConsoleProject
         static void OnQuit()
         {
             Application.RequestStop();
+        }
+        static void Export()
+        {
+            Export dialog = new Export();
+            dialog.SetRepository(repo.actorRepository);
+            Application.Run(dialog);
+            if(!dialog.canceled)
+            {
+                Xml xml = new Xml(repo.filmRepository);
+                xml.ExportData(repo.roleRepository.GetAllFilms(int.Parse(dialog.actorIdField.Text.ToString())), dialog.directory.Text.ToString());
+            }
         }
         static void ProcessClickCreate()
         {
