@@ -6,11 +6,13 @@ namespace ConsoleProject
         private TextField idField;
         private TextField opinionField;
         private TextField ratingField;
-        private DateField postedAtField;
+        private DateField postedAtDateField;
+        private TimeField postedAtTimeField;
         private TextField filmIdField;
         public bool deleted;
         public bool updated;
         public Review reviewToShow;
+        private Service repo;
         public ShowReviewDialog()
         {
             this.Title = "Show review";
@@ -42,11 +44,17 @@ namespace ConsoleProject
             this.Add(ratingLable, ratingField);
 
             Label postedAtLable = new Label(2, 8, "Posted at:");
-            postedAtField = new DateField()
+            postedAtDateField = new DateField()
             {
-                X = 20, Y = Pos.Top(postedAtLable), Width = Dim.Percent(50)
+                X = 20, Y = Pos.Top(postedAtLable), Width = Dim.Percent(30),
+                IsShortFormat = true
             };
-            this.Add(postedAtLable, postedAtField);
+            postedAtTimeField = new TimeField()
+            {
+                X = 30, Y = Pos.Top(postedAtLable), Width = Dim.Percent(30),
+                IsShortFormat = true
+            };
+            this.Add(postedAtLable, postedAtDateField, postedAtTimeField);
 
             Label filmIdLabel = new Label(2, 10, "Film id:");
             filmIdField = new TextField("")
@@ -77,6 +85,7 @@ namespace ConsoleProject
         {
             EditReviewDialog dialog = new EditReviewDialog();
             dialog.SetReview(this.reviewToShow);
+            dialog.SetService(repo);
             Application.Run(dialog);
 
             if(!dialog.canceled)
@@ -91,14 +100,21 @@ namespace ConsoleProject
         {
             return this.reviewToShow;
         }
+        public void SetService(Service repo)
+        {
+            this.repo = repo;
+        }
 
         public void SetReview(Review review)
         {
+            this.reviewToShow = review;
             this.idField.Text = review.id.ToString();
             this.opinionField.Text = review.opinion;
             this.ratingField.Text = review.rating.ToString();
-            this.postedAtField.Date = review.postedAt;
-            this.postedAtField.ReadOnly = true;
+            this.postedAtDateField.Date = review.postedAt.Date;
+            this.postedAtDateField.ReadOnly = true;
+            this.postedAtTimeField.Time = review.postedAt.TimeOfDay;
+            this.postedAtTimeField.ReadOnly = true;
             this.filmIdField.Text = review.filmId.ToString();
         }
         private void DialogCanceled()

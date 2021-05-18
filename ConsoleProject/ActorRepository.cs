@@ -34,7 +34,7 @@ namespace ConsoleProject
             connection.Close();
             return result;
         }
-        public int Update(long id, Actor actor)
+        public long Update(long id, Actor actor)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
@@ -43,7 +43,7 @@ namespace ConsoleProject
             command.Parameters.AddWithValue("$country", actor.country);
             command.Parameters.AddWithValue("$birthDate", actor.birthDate.ToShortDateString());
             command.Parameters.AddWithValue("$id", id);
-            int result = command.ExecuteNonQuery();
+            long result = command.ExecuteNonQuery();
             connection.Close();
             return result;
         }

@@ -115,17 +115,24 @@ namespace ConsoleProject
         static void ClickCreateActor()
         {
             CreateActorDialog dialog = new CreateActorDialog();
+            dialog.SetRepository(repo.filmRepository);
             Application.Run(dialog);
             if(!dialog.canceled)
             {
                 Actor actor = dialog.GetActor();
-                repo.actorRepository.Insert(actor);
+                int insertedId = (int)repo.actorRepository.Insert(actor);
+                int[] filmIds = dialog.GetFilmIds();
+                foreach(int id in filmIds)
+                {
+                    Role currentRole = new Role(){actorId = insertedId, filmId = id};
+                    repo.roleRepository.Insert(currentRole);
+                }
             }
         }
         static void ClickCreateReview()
         {
             CreateReviewDialog dialog = new CreateReviewDialog();
-            dialog.SetRepository(repo.filmRepository);
+            dialog.SetService(repo);
             Application.Run(dialog);
             if(!dialog.canceled)
             {
@@ -148,7 +155,7 @@ namespace ConsoleProject
         static void ClickShowAllReviews()
         {
             ShowAllReviewsDialog dialog = new ShowAllReviewsDialog();
-            dialog.SetRepository(repo.reviewRepository);
+            dialog.SetRepository(repo);
             Application.Run(dialog);
         }
         private static void ProcessClickShow()
@@ -170,7 +177,7 @@ namespace ConsoleProject
             Button showActors = new Button(4, 4, "Actors");
             showActors.Clicked += ClickShowActor;
             Button showReviews = new Button(4, 5, "Reviews");
-            showReviews.Clicked += ClickShowAllReviews;
+            showReviews.Clicked += ClickShowReview;
             Button cancel = new Button(4, 9, "Cancel");
             cancel.Clicked += OnQuit;
 
@@ -273,6 +280,7 @@ namespace ConsoleProject
             else
             {
                 ShowReviewDialog dialog = new ShowReviewDialog();
+                dialog.SetService(repo);
                 dialog.SetReview(repo.reviewRepository.GetById(id));
                 Application.Run(dialog);
                 if(dialog.deleted)
@@ -400,6 +408,7 @@ namespace ConsoleProject
             {
                 EditReviewDialog dialog = new EditReviewDialog();
                 dialog.SetReview(repo.reviewRepository.GetById(id));
+                dialog.SetService(repo);
                 Application.Run(dialog);
                 if(!dialog.canceled)
                 {

@@ -25,7 +25,7 @@ namespace ConsoleProject
             connection.Close();
             return newId;
         }
-        public void InsertImported(Film film)
+        public long InsertImported(Film film)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
@@ -40,6 +40,7 @@ namespace ConsoleProject
             command.Parameters.AddWithValue("$isImported", "imported");
             long newId = (long)command.ExecuteScalar();
             connection.Close();
+            return newId;
         }
         public int DeleteById(int id)
         {
@@ -51,7 +52,7 @@ namespace ConsoleProject
             connection.Close();
             return result;
         }
-        public int Update(long id, Film film)
+        public long Update(long id, Film film)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
@@ -61,7 +62,7 @@ namespace ConsoleProject
             command.Parameters.AddWithValue("$description", film.description);
             command.Parameters.AddWithValue("$releaseYear", film.releaseYear);
             command.Parameters.AddWithValue("$id", id);
-            int result = command.ExecuteNonQuery();
+            long result = command.ExecuteNonQuery();
             connection.Close();
             return result;
         }

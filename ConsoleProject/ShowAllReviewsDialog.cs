@@ -4,7 +4,7 @@ namespace ConsoleProject
 {
     public class ShowAllReviewsDialog : Dialog
     {
-        private ReviewRepository repo;
+        private Service repo;
         private int page = 1;
         private Label totalPagesLabel;
         private Label currentPageLabel;
@@ -64,19 +64,20 @@ namespace ConsoleProject
         {
             Review review = (Review)args.Value;
             ShowReviewDialog dialog = new ShowReviewDialog();
+            dialog.SetService(repo);
             dialog.SetReview(review);
             Application.Run(dialog);
             if(dialog.deleted)
             {
-                repo.DeleteById(review.id);
+                repo.reviewRepository.DeleteById(review.id);
             }
-            if(page > repo.GetTotalPages() && page > 1)
+            if(page > repo.reviewRepository.GetTotalPages() && page > 1)
             {
                 page--;
             }
             if(dialog.updated)
             {
-                repo.Update((long)review.id, dialog.GetReview());
+                repo.reviewRepository.Update((long)review.id, dialog.GetReview());
             }
             ShowCurrentPage();
         }
@@ -96,7 +97,7 @@ namespace ConsoleProject
             {
                 errorText = "Page must be integer.";
             }
-            else if(toPage < 1 || toPage > repo.GetTotalPages())
+            else if(toPage < 1 || toPage > repo.reviewRepository.GetTotalPages())
             {
                 errorText = "Page is out of range.";
             }
@@ -110,7 +111,7 @@ namespace ConsoleProject
                 ShowCurrentPage();
             }
         }
-        public void SetRepository(ReviewRepository repo)
+        public void SetRepository(Service repo)
         {
             this.repo = repo;
             ShowCurrentPage();
@@ -126,7 +127,7 @@ namespace ConsoleProject
         }
         private void ClickNextPage()
         {
-            int totalPages = repo.GetTotalPages();
+            int totalPages = repo.reviewRepository.GetTotalPages();
             if(page == totalPages)
             {
                 return;
@@ -137,8 +138,8 @@ namespace ConsoleProject
         private void ShowCurrentPage()
         {
             this.currentPageLabel.Text = this.page.ToString();
-            this.totalPagesLabel.Text = repo.GetTotalPages().ToString();
-            this.allReviews.SetSource(repo.GetPage(page));
+            this.totalPagesLabel.Text = repo.reviewRepository.GetTotalPages().ToString();
+            this.allReviews.SetSource(repo.reviewRepository.GetPage(page));
         }
         private void DialogCanceled()
         {

@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Data.Sqlite;
 using System.IO;
-using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class Range<T>
@@ -13,6 +12,8 @@ namespace ConsoleProject
     {
         static void Main(string[] args)
         {
+            UserInterface.MainWindow();
+            Environment.Exit(0);
             string dataBaseFile = "/home/valeria/Desktop/progbase3/data/data.db";
             SqliteConnection connection = new SqliteConnection($"Data Source = {dataBaseFile}");
             while(true)
@@ -40,16 +41,10 @@ namespace ConsoleProject
                 }
                 else if(command == "4")
                 {
-                    //ProcessGenerateUsers(generatorPath, repo);
-                    Xml xml = new Xml(connection);
-                    List<Film> films = repo.roleRepository.GetAllFilms(1);
-                    xml.ExportData(films, "./export.xml");
-                    Console.WriteLine("End.");
+                    ProcessGenerateUsers(generatorPath, repo);
                 }
                 else if(command == "5")
                 {
-                    Xml xml = new Xml(connection);
-                    xml.ImportData("./export.xml");
                     Console.WriteLine("End.");
                     break;
                 }
@@ -403,7 +398,7 @@ namespace ConsoleProject
                 Console.Error.WriteLine("Error: Cannot generate reviews, when database doesn`t contain any users.");
                 return;
             }
-            DateTime min = GetMin(repo);
+            DateTime min = GetMinYear(repo);
             int numberOfEntities = GetNumberOfEntities();
             DateTime start;
             DateTime end;
@@ -447,7 +442,7 @@ namespace ConsoleProject
             }
             Console.WriteLine("Done!");
         }
-        static DateTime GetMin(Service repo)
+        static DateTime GetMinYear(Service repo)
         {
             int minYear = repo.filmRepository.GetMinReleaseYear();
             DateTime minRegistration = repo.userRepository.GetMinRegistrationDate();

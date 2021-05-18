@@ -86,6 +86,7 @@ namespace ConsoleProject
         }
         public void SetActor(Actor actor)
         {
+            this.actorToshow = actor;
             this.idField.Text = actor.id.ToString();
             this.fullnameField.Text = actor.fullname;
             this.countryField.Text = actor.country;

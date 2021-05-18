@@ -1,13 +1,17 @@
 using Terminal.Gui;
 using System;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class CreateActorDialog : Dialog
     {
         public bool canceled;
+        protected FilmRepository repo;
         protected TextField inputFullname;
         protected TextField inputCountry;
         protected DateField inputBirthDate;
+        protected TextField inputRoles;
+        private List<int> filmIds;
         public CreateActorDialog()
         {
             this.Title = "Create actor";
@@ -38,12 +42,30 @@ namespace ConsoleProject
                 X = 20, Y = Pos.Top(actorBirthdate), Width = Dim.Percent(50), IsShortFormat = true
             };
             this.Add(actorBirthdate, inputBirthDate);
+
+            Label actorRoles = new Label(2, 8, "Film ids(roles):");
+            inputRoles = new TextField("")
+            {
+                X = 20, Y = Pos.Top(actorRoles), Width = Dim.Percent(50)
+            };
+            this.Add(actorRoles, inputRoles);
         }
         public Actor GetActor()
         {
             return new Actor(){fullname = inputFullname.Text.ToString(), 
                             country = inputCountry.Text.ToString(),
-                            birthDate = DateTime.Parse(inputBirthDate.Text.ToString())};
+                            birthDate = DateTime.Parse(inputBirthDate.Text.ToString())
+                            };
+        }
+        public int[] GetFilmIds()
+        {
+            int[] ids = new int[filmIds.Count];
+            filmIds.CopyTo(ids);
+            return ids;
+        }
+        public void SetRepository(FilmRepository repo)
+        {
+            this.repo = repo;
         }
         private void DialogCanceled()
         {
@@ -68,6 +90,37 @@ namespace ConsoleProject
             else if(!DateTime.TryParse(inputBirthDate.Text.ToString(), out DateTime birthDate) || birthDate > DateTime.Now)
             {
                 errorText = $"Birth date must be less than {DateTime.Now.ToString("o")}.";
+            }
+            else
+            {
+                string[] ids = inputRoles.Text.ToString().Split(",");
+                if(ids.Length == 0)
+                {
+                    errorText = "";
+                }
+                else
+                {
+                    filmIds = new List<int>();
+                    for(int i = 0; i<ids.Length; i++)
+                    {
+                        if(!int.TryParse(ids[i], out int id))
+                        {
+                            errorText = $"Unavailable id: {ids[i]}.";
+                            break;
+                        }
+                        else if(repo.GetById(id) == null)
+                        {
+                            errorText = $"Id '{id}' does not exist in the database.";
+                            break;
+                        }
+                        else if(filmIds.Contains(id))
+                        {
+                            errorText = "Ids mustn`t contain equal values.";
+                            break;
+                        }
+                        filmIds.Add(id);
+                    }
+                }
             }
             if(errorText != "")
             {

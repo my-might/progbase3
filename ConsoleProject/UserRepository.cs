@@ -36,7 +36,7 @@ namespace ConsoleProject
             connection.Close();
             return result;
         }
-        public int Update(long id, User user)
+        public long Update(long id, User user)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
@@ -48,7 +48,7 @@ namespace ConsoleProject
             command.Parameters.AddWithValue("$isModerator", user.isModerator);
             command.Parameters.AddWithValue("$registrationDate", user.registrationDate.ToString("o"));
             command.Parameters.AddWithValue("$id", id);
-            int result = command.ExecuteNonQuery();
+            long result = command.ExecuteNonQuery();
             connection.Close();
             return result;
         }

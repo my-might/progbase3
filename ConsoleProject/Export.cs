@@ -21,7 +21,7 @@ namespace ConsoleProject
             {
                 X = 20, Y = Pos.Top(actorIdLabel), Width = Dim.Percent(50)
             };
-            Label filePathLabel = new Label(2, 4, "Select filepath to save:");
+            Label filePathLabel = new Label(2, 4, "Select directory:");
             Button openDirectory = new Button("Open directory")
             {
                 X = 20, Y = Pos.Top(filePathLabel)
@@ -31,12 +31,13 @@ namespace ConsoleProject
             {
                 X = 20, Y = Pos.Top(filePathLabel) + 1, Width = Dim.Fill()
             };
-            this.Add(actorIdLabel, actorIdField, openDirectory, directory);
+            this.Add(actorIdLabel, actorIdField, filePathLabel, openDirectory, directory);
         }
         private void SelectDirectory()
         {
             OpenDialog dialog = new OpenDialog("Open directory", "Open?");
-            dialog.CanChooseFiles = true;
+            dialog.CanChooseDirectories = true;
+            dialog.CanChooseFiles = false;
             Application.Run(dialog);
         
             if (!dialog.Canceled)
@@ -48,7 +49,6 @@ namespace ConsoleProject
             {
                 directory.Text = "not selected.";
             }
-
         }
         public void SetRepository(ActorRepository repo)
         {
@@ -68,6 +68,10 @@ namespace ConsoleProject
             else if(repo.GetById(actorId) == null)
             {
                 errorText = "Entered actor id does not exist in the database.";
+            }
+            else if(directory.Text.ToString() == "")
+            {
+                errorText = "You have to choose directory to save export.";
             }
             if(errorText != "")
             {

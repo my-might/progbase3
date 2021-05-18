@@ -9,7 +9,7 @@ namespace ConsoleProject
         protected TextField inputOpinion;
         protected TextField inputRating;
         protected TextField inputFilmId;
-        protected FilmRepository repo;
+        private Service repo;
         public CreateReviewDialog()
         {
             this.Title = "Create review";
@@ -41,7 +41,7 @@ namespace ConsoleProject
             };
             this.Add(reviewFilmId, inputFilmId);
         }
-        public void SetRepository(FilmRepository repo)
+        public void SetService(Service repo)
         {
             this.repo = repo;
         }
@@ -81,7 +81,7 @@ namespace ConsoleProject
             {
                 errorText = "Film id must be integer.";
             }
-            else if(repo.GetById(id) == null)
+            else if(repo.filmRepository.GetById(id) == null)
             {
                 errorText = "Entered film id does not exist in the database.";
             }

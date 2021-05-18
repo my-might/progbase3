@@ -36,16 +36,17 @@ namespace ConsoleProject
             connection.Close();
             return result;
         }
-        public int Update(long id, Review review)
+        public long Update(long id, Review review)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"UPDATE reviews SET opinion = $opinion, rating = $rating, postedAt = $postedAt WHERE id = $id";
+            command.CommandText = @"UPDATE reviews SET opinion = $opinion, rating = $rating, postedAt = $postedAt, filmId = $filmId WHERE id = $id";
             command.Parameters.AddWithValue("$opinion", review.opinion);
             command.Parameters.AddWithValue("$rating", review.rating);
-            command.Parameters.AddWithValue("$postedAt", review.postedAt);
+            command.Parameters.AddWithValue("$postedAt", review.postedAt.ToString("o"));
+            command.Parameters.AddWithValue("$filmId", review.filmId);
             command.Parameters.AddWithValue("$id", id);
-            int result = command.ExecuteNonQuery();
+            long result = command.ExecuteNonQuery();
             connection.Close();
             return result;
         }
@@ -159,7 +160,8 @@ namespace ConsoleProject
             review.opinion = reader.GetString(1);
             review.rating = int.Parse(reader.GetString(2));
             review.postedAt = DateTime.Parse(reader.GetString(3));
-            review.filmId = int.Parse(reader.GetString(4));
+            review.userId = int.Parse(reader.GetString(4));
+            review.filmId = int.Parse(reader.GetString(5));
             return review;
         }
         

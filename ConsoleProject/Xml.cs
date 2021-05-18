@@ -11,10 +11,10 @@ namespace ConsoleProject
         {
             this.repo = repo;
         }
-        public void ExportData(List<Film> films, string filePath)
+        public void ExportData(List<Film> films, string directoryPath)
         {
             XmlSerializer ser = new XmlSerializer(typeof(List<Film>));
-            StreamWriter sw = new System.IO.StreamWriter(filePath);
+            StreamWriter sw = new System.IO.StreamWriter(directoryPath + "/export.xml");
             ser.Serialize(sw, films);
             sw.Close();
         }
