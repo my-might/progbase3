@@ -1,14 +1,18 @@
 using Terminal.Gui;
 using System;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class CreateFilmDialog : Dialog
     {
         public bool canceled;
+        protected ActorRepository repo;
         protected TextField inputTitle;
         protected TextField inputGenre;
         protected TextField inputDescription;
         protected TextField inputRelease;
+        protected TextField inputRoles;
+        private List<int> actorIds;
         public CreateFilmDialog()
         {
             this.Title = "Create film";
@@ -46,6 +50,13 @@ namespace ConsoleProject
                 X = 20, Y = Pos.Top(filmRelease), Width = Dim.Percent(50)
             };
             this.Add(filmRelease, inputRelease);
+
+            Label filmRoles = new Label(2, 8, "Starring actors:");
+            inputRoles = new TextField("")
+            {
+                X = 20, Y = Pos.Top(filmRoles), Width = Dim.Percent(50)
+            };
+            this.Add(filmRoles, inputRoles);
         }
         public Film GetFilm()
         {
@@ -53,6 +64,12 @@ namespace ConsoleProject
                             genre = inputGenre.Text.ToString(),
                             description = inputDescription.Text.ToString(),
                             releaseYear = int.Parse(inputRelease.Text.ToString())};
+        }
+        public int[] GetActorIds()
+        {
+            int[] ids = new int[actorIds.Count];
+            actorIds.CopyTo(ids);
+            return ids;
         }
         private void DialogCanceled()
         {
@@ -81,6 +98,37 @@ namespace ConsoleProject
             else if(!int.TryParse(inputRelease.Text.ToString(), out int year) || year > DateTime.Now.Year || year < 1895)
             {
                 errorText = $"Release year must be integer from 1895 to {DateTime.Now.Year}.";
+            }
+            else
+            {
+                string[] ids = inputRoles.Text.ToString().Split(",");
+                if(ids.Length == 0)
+                {
+                    errorText = "";
+                }
+                else
+                {
+                    actorIds = new List<int>();
+                    for(int i = 0; i<ids.Length; i++)
+                    {
+                        if(!int.TryParse(ids[i], out int id))
+                        {
+                            errorText = $"Unavailable id: {ids[i]}.";
+                            break;
+                        }
+                        else if(repo.GetById(id) == null)
+                        {
+                            errorText = $"Actor with id '{id}' does not exist in the database.";
+                            break;
+                        }
+                        else if(actorIds.Contains(id))
+                        {
+                            errorText = "Ids mustn`t contain equal values.";
+                            break;
+                        }
+                        actorIds.Add(id);
+                    }
+                }
             }
             if(errorText != "")
             {

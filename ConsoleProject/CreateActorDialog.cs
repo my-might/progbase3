@@ -110,7 +110,7 @@ namespace ConsoleProject
                         }
                         else if(repo.GetById(id) == null)
                         {
-                            errorText = $"Id '{id}' does not exist in the database.";
+                            errorText = $"Film with id '{id}' does not exist in the database.";
                             break;
                         }
                         else if(filmIds.Contains(id))

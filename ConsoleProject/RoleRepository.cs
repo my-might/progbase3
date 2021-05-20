@@ -23,13 +23,14 @@ namespace ConsoleProject
             connection.Close();
             return newId;
         }
-        public int DeleteById(int id)
+        public long Delete(int actorId, int filmId)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"DELETE FROM roles WHERE id = $id";
-            command.Parameters.AddWithValue("$id", id);
-            int result = command.ExecuteNonQuery();
+            command.CommandText = @"DELETE FROM roles WHERE actorId = $actorId AND filmId = $filmId";
+            command.Parameters.AddWithValue("$actorId", actorId);
+            command.Parameters.AddWithValue("$filmId", filmId);
+            long result = command.ExecuteNonQuery();
             connection.Close();
             return result;
         }

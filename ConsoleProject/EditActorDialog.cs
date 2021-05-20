@@ -1,3 +1,4 @@
+
 namespace ConsoleProject
 {
     public class EditActorDialog : CreateActorDialog
@@ -11,6 +12,19 @@ namespace ConsoleProject
             this.inputFullname.Text = actor.fullname;
             this.inputCountry.Text = actor.country;
             this.inputBirthDate.Date = actor.birthDate; 
+            string ids = "";
+            if(actor.films.Length != 0)
+            {
+                for(int i = 0; i<actor.films.Length; i++)
+                {
+                    ids += $"{actor.films[i].id}";
+                    if(i != actor.films.Length - 1)
+                    {
+                        ids += ",";
+                    }
+                }
+            }
+            this.inputRoles.Text = ids;
         }
     }
 }

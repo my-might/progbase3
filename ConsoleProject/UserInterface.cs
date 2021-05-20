@@ -1,5 +1,6 @@
 using Terminal.Gui;
 using Microsoft.Data.Sqlite;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class UserInterface
@@ -109,7 +110,13 @@ namespace ConsoleProject
             if(!dialog.canceled)
             {
                 Film film = dialog.GetFilm();
-                repo.filmRepository.Insert(film);
+                int insertedId = (int)repo.filmRepository.Insert(film);
+                int[] actorIds = dialog.GetActorIds();
+                foreach(int id in actorIds)
+                {
+                    Role currentRole = new Role(){actorId = id, filmId = insertedId};
+                    repo.roleRepository.Insert(currentRole);
+                }
             }
         }
         static void ClickCreateActor()
@@ -244,7 +251,11 @@ namespace ConsoleProject
             else
             {
                 ShowActorDialog dialog = new ShowActorDialog();
-                dialog.SetActor(repo.actorRepository.GetById(id));
+                Actor actorToSet = repo.actorRepository.GetById(id);
+                List<Film> roles = repo.roleRepository.GetAllFilms(id);
+                actorToSet.films = new Film[roles.Count];
+                roles.CopyTo(actorToSet.films);
+                dialog.SetActor(actorToSet);
                 Application.Run(dialog);
                 if(dialog.deleted)
                 {
@@ -253,6 +264,15 @@ namespace ConsoleProject
                 if(dialog.updated)
                 {
                     repo.actorRepository.Update((long) id, dialog.GetActor());
+                    int[] updatedRoles = dialog.GetUpdatedRoles();
+                    foreach(int filmId in updatedRoles)
+                    {
+                        if(!repo.roleRepository.IsExist(filmId, actorToSet.id))
+                        {
+                            Role currentRole = new Role(){actorId = actorToSet.id, filmId = filmId};
+                            repo.roleRepository.Insert(currentRole);
+                        }
+                    }
                 }
             }
         }
@@ -375,11 +395,41 @@ namespace ConsoleProject
             else
             {
                 EditActorDialog dialog = new EditActorDialog();
-                dialog.SetActor(repo.actorRepository.GetById(id));
+                Actor actorToSet = repo.actorRepository.GetById(id);
+                List<Film> roles = repo.roleRepository.GetAllFilms(id);
+                actorToSet.films = new Film[roles.Count];
+                roles.CopyTo(actorToSet.films);
+                dialog.SetActor(actorToSet);
+                dialog.SetRepository(repo.filmRepository);
                 Application.Run(dialog);
                 if(!dialog.canceled)
                 {
                     repo.actorRepository.Update((long) id, dialog.GetActor());
+                    int[] updatedRoles = dialog.GetFilmIds();
+                    foreach(int filmId in updatedRoles)
+                    {
+                        if(!repo.roleRepository.IsExist(filmId, actorToSet.id))
+                        {
+                            Role currentRole = new Role(){actorId = actorToSet.id, filmId = filmId};
+                            repo.roleRepository.Insert(currentRole);
+                        }
+                    }
+                    foreach(Film film in roles)
+                    {
+                        bool isExist = false;
+                        for(int i = 0; i<updatedRoles.Length; i++)
+                        {
+                            if(film.id == updatedRoles[i])
+                            {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(!isExist)
+                        {
+                            repo.roleRepository.Delete(actorToSet.id, film.id);
+                        }
+                    }
                 }
             }
         }

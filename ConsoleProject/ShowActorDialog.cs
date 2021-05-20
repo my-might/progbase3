@@ -1,5 +1,6 @@
 using Terminal.Gui;
 using System;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class ShowActorDialog : Dialog
@@ -8,6 +9,8 @@ namespace ConsoleProject
         private TextField fullnameField;
         private TextField countryField;
         private DateField birthdateField;
+        private ListView rolesView;
+        private int[] updatedRoles;
         public bool deleted;
         public bool updated;
         public Actor actorToshow;
@@ -48,6 +51,14 @@ namespace ConsoleProject
                 X = 20, Y = Pos.Top(birthdateLabel), Width = Dim.Percent(50)
             };
             this.Add(birthdateLabel, birthdateField);
+
+            Label rolesLabel = new Label(2, 8, "Film ids:");
+            rolesView = new ListView()
+            {
+                X = 20, Y = Pos.Top(rolesLabel), Width = Dim.Percent(50)
+            };
+            this.Add(rolesLabel, rolesView);
+
             Button delete = new Button(2, 12, "Delete");
             delete.Clicked += OnDeleteActor;
             Button edit = new Button("Edit")
@@ -76,9 +87,11 @@ namespace ConsoleProject
             {
                 Actor updated = dialog.GetActor();
                 updated.id = actorToshow.id;
-                this.SetActor(updated);
+                this.actorToshow = updated;
+                this.updatedRoles = dialog.GetFilmIds();
                 this.updated = true;
             }
+            Application.RequestStop();
         }
         public Actor GetActor()
         {
@@ -92,6 +105,20 @@ namespace ConsoleProject
             this.countryField.Text = actor.country;
             this.birthdateField.Date = actor.birthDate;
             this.birthdateField.ReadOnly = true;
+            this.rolesView.SetSource(ArrayToList(actor.films));
+        }
+        private List<Film> ArrayToList(Film[] films)
+        {
+            List<Film> result = new List<Film>();
+            foreach(Film film in films)
+            {
+                result.Add(film);
+            }
+            return result;
+        }
+        public int[] GetUpdatedRoles()
+        {
+            return this.updatedRoles;
         }
         private void DialogCanceled()
         {
