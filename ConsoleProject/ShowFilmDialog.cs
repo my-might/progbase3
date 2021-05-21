@@ -1,4 +1,5 @@
 using Terminal.Gui;
+using System.Collections.Generic;
 namespace ConsoleProject
 {
     public class ShowFilmDialog : Dialog
@@ -8,9 +9,12 @@ namespace ConsoleProject
         private TextField genreField;
         private TextField descriptionField;
         private TextField yearField;
+        private ListView rolesView;
+        private int[] updatedRoles;
         public bool deleted;
         public bool updated;
         public Film filmToShow;
+        private ActorRepository repo;
 
         
         public ShowFilmDialog()
@@ -58,11 +62,27 @@ namespace ConsoleProject
                 ReadOnly = true
             };
             this.Add(yearLabel, yearField);
-            Button delete = new Button(2, 12, "Delete");
+
+            Label rolesLabel = new Label(2, 10, "Starring actors:");
+            rolesView = new ListView(new List<Actor>())
+            {
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            FrameView frameView = new FrameView("")
+            {
+                X = 20, Y = Pos.Top(rolesLabel),
+                Width = Dim.Percent(50),
+                Height = 5
+            };
+            frameView.Add(rolesView);
+            this.Add(rolesLabel, frameView);
+
+            Button delete = new Button(2, 13, "Delete");
             delete.Clicked += OnDeleteFilm;
             Button edit = new Button("Edit")
             {
-                X = Pos.Right(delete) + 3, Y = 12
+                X = delete.X, Y = 15
             };
             edit.Clicked += OnEditFilm;
             this.Add(delete, edit);
@@ -80,15 +100,18 @@ namespace ConsoleProject
         {
             EditFilmDialog dialog = new EditFilmDialog();
             dialog.SetFilm(this.filmToShow);
+            dialog.SetRepository(this.repo);
             Application.Run(dialog);
 
             if(!dialog.canceled)
             {
                 Film updated = dialog.GetFilm();
                 updated.id = filmToShow.id;
-                this.SetFilm(updated);
+                this.filmToShow = updated;
+                this.updatedRoles = dialog.GetActorIds();
                 this.updated = true;
             }
+            Application.RequestStop();
         }
         public Film GetFilm()
         {
@@ -102,6 +125,25 @@ namespace ConsoleProject
             this.genreField.Text = film.genre;
             this.descriptionField.Text = film.description;
             this.yearField.Text = film.releaseYear.ToString();
+            List<Actor> actors = ArrayToList(film.actors);
+            this.rolesView.SetSource(actors);
+        }
+        public void SetRepository(ActorRepository repo)
+        {
+            this.repo = repo;
+        }
+        private List<Actor> ArrayToList(Actor[] actors)
+        {
+            List<Actor> result = new List<Actor>();
+            foreach(Actor actor in actors)
+            {
+                result.Add(actor);
+            }
+            return result;
+        }
+        public int[] GetUpdatedRoles()
+        {
+            return this.updatedRoles;
         }
         private void DialogCanceled()
         {

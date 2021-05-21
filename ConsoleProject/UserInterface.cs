@@ -106,6 +106,7 @@ namespace ConsoleProject
         static void ClickCreateFilm()
         {
             CreateFilmDialog dialog = new CreateFilmDialog();
+            dialog.SetRepository(repo.actorRepository);
             Application.Run(dialog);
             if(!dialog.canceled)
             {
@@ -150,13 +151,13 @@ namespace ConsoleProject
         static void ClickShowAllFilms()
         {
             ShowAllFilmsDialog dialog = new ShowAllFilmsDialog();
-            dialog.SetRepository(repo.filmRepository);
+            dialog.SetRepository(repo);
             Application.Run(dialog);
         }
         static void ClickShowAllActors()
         {
             ShowAllActorsDialog dialog = new ShowAllActorsDialog();
-            dialog.SetRepository(repo.actorRepository);
+            dialog.SetRepository(repo);
             Application.Run(dialog);
         }
         static void ClickShowAllReviews()
@@ -215,15 +216,46 @@ namespace ConsoleProject
             else
             {
                 ShowFilmDialog dialog = new ShowFilmDialog();
-                dialog.SetFilm(repo.filmRepository.GetById(id));
+                Film filmToSet = repo.filmRepository.GetById(id);
+                List<Actor> roles = repo.roleRepository.GetAllActors(id);
+                filmToSet.actors = new Actor[roles.Count];
+                roles.CopyTo(filmToSet.actors);
+                dialog.SetFilm(filmToSet);
+                dialog.SetRepository(repo.actorRepository);
                 Application.Run(dialog);
                 if(dialog.deleted)
                 {
                     repo.filmRepository.DeleteById(id);
+                    repo.roleRepository.DeleteByFilmId(id);
                 }
                 if(dialog.updated)
                 {
                     repo.filmRepository.Update((long) id, dialog.GetFilm());
+                    int[] updatedRoles = dialog.GetUpdatedRoles();
+                    foreach(int actorId in updatedRoles)
+                    {
+                        if(!repo.roleRepository.IsExist(filmToSet.id, actorId))
+                        {
+                            Role currentRole = new Role(){actorId = actorId, filmId = filmToSet.id};
+                            repo.roleRepository.Insert(currentRole);
+                        }
+                    }
+                    foreach(Actor actor in roles)
+                    {
+                        bool isExist = false;
+                        for(int i = 0; i<updatedRoles.Length; i++)
+                        {
+                            if(actor.id == updatedRoles[i])
+                            {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(!isExist)
+                        {
+                            repo.roleRepository.Delete(actor.id, filmToSet.id);
+                        }
+                    }
                 }
             }
         }
@@ -256,10 +288,12 @@ namespace ConsoleProject
                 actorToSet.films = new Film[roles.Count];
                 roles.CopyTo(actorToSet.films);
                 dialog.SetActor(actorToSet);
+                dialog.SetRepository(repo.filmRepository);
                 Application.Run(dialog);
                 if(dialog.deleted)
                 {
                     repo.actorRepository.DeleteById(id);
+                    repo.roleRepository.DeleteByActorId(id);
                 }
                 if(dialog.updated)
                 {
@@ -271,6 +305,22 @@ namespace ConsoleProject
                         {
                             Role currentRole = new Role(){actorId = actorToSet.id, filmId = filmId};
                             repo.roleRepository.Insert(currentRole);
+                        }
+                    }
+                    foreach(Film film in roles)
+                    {
+                        bool isExist = false;
+                        for(int i = 0; i<updatedRoles.Length; i++)
+                        {
+                            if(film.id == updatedRoles[i])
+                            {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(!isExist)
+                        {
+                            repo.roleRepository.Delete(actorToSet.id, film.id);
                         }
                     }
                 }
@@ -363,11 +413,41 @@ namespace ConsoleProject
             else
             {
                 EditFilmDialog dialog = new EditFilmDialog();
-                dialog.SetFilm(repo.filmRepository.GetById(id));
+                Film filmToSet = repo.filmRepository.GetById(id);
+                List<Actor> roles = repo.roleRepository.GetAllActors(id);
+                filmToSet.actors = new Actor[roles.Count];
+                roles.CopyTo(filmToSet.actors);
+                dialog.SetFilm(filmToSet);
+                dialog.SetRepository(repo.actorRepository);
                 Application.Run(dialog);
                 if(!dialog.canceled)
                 {
-                    repo.filmRepository.Update((long)id, dialog.GetFilm());
+                    repo.filmRepository.Update((long) id, dialog.GetFilm());
+                    int[] updatedRoles = dialog.GetActorIds();
+                    foreach(int actorId in updatedRoles)
+                    {
+                        if(!repo.roleRepository.IsExist(filmToSet.id, actorId))
+                        {
+                            Role currentRole = new Role(){actorId = actorId, filmId = filmToSet.id};
+                            repo.roleRepository.Insert(currentRole);
+                        }
+                    }
+                    foreach(Actor actor in roles)
+                    {
+                        bool isExist = false;
+                        for(int i = 0; i<updatedRoles.Length; i++)
+                        {
+                            if(actor.id == updatedRoles[i])
+                            {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(!isExist)
+                        {
+                            repo.roleRepository.Delete(actor.id, filmToSet.id);
+                        }
+                    }
                 }
             }
         }

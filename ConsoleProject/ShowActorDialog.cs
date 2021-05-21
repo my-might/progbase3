@@ -14,6 +14,7 @@ namespace ConsoleProject
         public bool deleted;
         public bool updated;
         public Actor actorToshow;
+        private FilmRepository repo;
         
         public ShowActorDialog()
         {
@@ -52,18 +53,26 @@ namespace ConsoleProject
             };
             this.Add(birthdateLabel, birthdateField);
 
-            Label rolesLabel = new Label(2, 8, "Film ids:");
-            rolesView = new ListView()
+            Label rolesLabel = new Label(2, 10, "Starred in:");
+            rolesView = new ListView(new List<Film>())
             {
-                X = 20, Y = Pos.Top(rolesLabel), Width = Dim.Percent(50)
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
             };
-            this.Add(rolesLabel, rolesView);
+            FrameView frameView = new FrameView("")
+            {
+                X = 20, Y = Pos.Top(rolesLabel),
+                Width = Dim.Percent(50),
+                Height = 5
+            };
+            frameView.Add(rolesView);
+            this.Add(rolesLabel, frameView);
 
-            Button delete = new Button(2, 12, "Delete");
+            Button delete = new Button(2, 13, "Delete");
             delete.Clicked += OnDeleteActor;
             Button edit = new Button("Edit")
             {
-                X = Pos.Right(delete) + 3, Y = 12
+                X = delete.X, Y = 15
             };
             edit.Clicked += OnEditActor;
             this.Add(delete, edit);
@@ -81,6 +90,7 @@ namespace ConsoleProject
         {
             EditActorDialog dialog = new EditActorDialog();
             dialog.SetActor(this.actorToshow);
+            dialog.SetRepository(this.repo);
             Application.Run(dialog);
 
             if(!dialog.canceled)
@@ -105,7 +115,12 @@ namespace ConsoleProject
             this.countryField.Text = actor.country;
             this.birthdateField.Date = actor.birthDate;
             this.birthdateField.ReadOnly = true;
-            this.rolesView.SetSource(ArrayToList(actor.films));
+            List<Film> films = ArrayToList(actor.films);
+            this.rolesView.SetSource(films);
+        }
+        public void SetRepository(FilmRepository repo)
+        {
+            this.repo = repo;
         }
         private List<Film> ArrayToList(Film[] films)
         {

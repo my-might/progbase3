@@ -12,6 +12,19 @@ namespace ConsoleProject
             this.inputGenre.Text = film.genre;
             this.inputDescription.Text = film.description;
             this.inputRelease.Text = film.releaseYear.ToString();
+            string ids = "";
+            if(film.actors.Length != 0)
+            {
+                for(int i = 0; i<film.actors.Length; i++)
+                {
+                    ids += $"{film.actors[i].id}";
+                    if(i != film.actors.Length - 1)
+                    {
+                        ids += ",";
+                    }
+                }
+            }
+            this.inputRoles.Text = ids;
         }
     }
 }

@@ -34,6 +34,26 @@ namespace ConsoleProject
             connection.Close();
             return result;
         }
+        public long DeleteByActorId(int actorId)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"DELETE FROM roles WHERE actorId = $actorId";
+            command.Parameters.AddWithValue("$actorId", actorId);
+            long result = command.ExecuteNonQuery();
+            connection.Close();
+            return result;
+        }
+        public long DeleteByFilmId(int filmId)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"DELETE FROM roles WHERE filmId = $filmId";
+            command.Parameters.AddWithValue("$filmId", filmId);
+            long result = command.ExecuteNonQuery();
+            connection.Close();
+            return result;
+        }
         public Role GetById(int id)
         {
             connection.Open();

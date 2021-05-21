@@ -43,7 +43,7 @@ namespace ConsoleProject
             };
             this.Add(actorBirthdate, inputBirthDate);
 
-            Label actorRoles = new Label(2, 8, "Film ids(roles):");
+            Label actorRoles = new Label(2, 8, "Starred in:");
             inputRoles = new TextField("")
             {
                 X = 20, Y = Pos.Top(actorRoles), Width = Dim.Percent(50)

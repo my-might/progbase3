@@ -71,6 +71,10 @@ namespace ConsoleProject
             actorIds.CopyTo(ids);
             return ids;
         }
+        public void SetRepository(ActorRepository repo)
+        {
+            this.repo = repo;
+        }
         private void DialogCanceled()
         {
             this.canceled = true;

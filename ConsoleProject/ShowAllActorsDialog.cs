@@ -4,7 +4,7 @@ namespace ConsoleProject
 {
     public class ShowAllActorsDialog : Dialog
     {
-        private ActorRepository repo;
+        private Service repo;
         private int page = 1;
         private Label totalPagesLabel;
         private Label currentPageLabel;
@@ -63,20 +63,50 @@ namespace ConsoleProject
         private void OnOpenActor(ListViewItemEventArgs args)
         {
             Actor actor = (Actor)args.Value;
+            List<Film> roles = repo.roleRepository.GetAllFilms(actor.id);
+            actor.films = new Film[roles.Count];
+            roles.CopyTo(actor.films);
             ShowActorDialog dialog = new ShowActorDialog();
             dialog.SetActor(actor);
+            dialog.SetRepository(repo.filmRepository);
             Application.Run(dialog);
             if(dialog.deleted)
             {
-                repo.DeleteById(actor.id);
+                repo.actorRepository.DeleteById(actor.id);
+                repo.roleRepository.DeleteByActorId(actor.id);
             }
-            if(page > repo.GetTotalPages() && page > 1)
+            if(page > repo.actorRepository.GetTotalPages() && page > 1)
             {
                 page--;
             }
             if(dialog.updated)
             {
-                repo.Update((long)actor.id, dialog.GetActor());
+                repo.actorRepository.Update((long)actor.id, dialog.GetActor());
+                int[] updatedRoles = dialog.GetUpdatedRoles();
+                    foreach(int filmId in updatedRoles)
+                    {
+                        if(!repo.roleRepository.IsExist(filmId, actor.id))
+                        {
+                            Role currentRole = new Role(){actorId = actor.id, filmId = filmId};
+                            repo.roleRepository.Insert(currentRole);
+                        }
+                    }
+                    foreach(Film film in roles)
+                    {
+                        bool isExist = false;
+                        for(int i = 0; i<updatedRoles.Length; i++)
+                        {
+                            if(film.id == updatedRoles[i])
+                            {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(!isExist)
+                        {
+                            repo.roleRepository.Delete(actor.id, film.id);
+                        }
+                    }
             }
             ShowCurrentPage();
         }
@@ -96,7 +126,7 @@ namespace ConsoleProject
             {
                 errorText = "Page must be integer.";
             }
-            else if(toPage < 1 || toPage > repo.GetTotalPages())
+            else if(toPage < 1 || toPage > repo.actorRepository.GetTotalPages())
             {
                 errorText = "Page is out of range.";
             }
@@ -110,7 +140,7 @@ namespace ConsoleProject
                 ShowCurrentPage();
             }
         }
-        public void SetRepository(ActorRepository repo)
+        public void SetRepository(Service repo)
         {
             this.repo = repo;
             ShowCurrentPage();
@@ -126,7 +156,7 @@ namespace ConsoleProject
         }
         private void ClickNextPage()
         {
-            int totalPages = repo.GetTotalPages();
+            int totalPages = repo.actorRepository.GetTotalPages();
             if(page == totalPages)
             {
                 return;
@@ -137,8 +167,8 @@ namespace ConsoleProject
         private void ShowCurrentPage()
         {
             this.currentPageLabel.Text = this.page.ToString();
-            this.totalPagesLabel.Text = repo.GetTotalPages().ToString();
-            this.allActors.SetSource(repo.GetPage(page));
+            this.totalPagesLabel.Text = repo.actorRepository.GetTotalPages().ToString();
+            this.allActors.SetSource(repo.actorRepository.GetPage(page));
         }
         private void DialogCanceled()
         {
