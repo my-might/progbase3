@@ -10,7 +10,7 @@ namespace ConsoleProject
         private TextField countryField;
         private DateField birthdateField;
         private ListView rolesView;
-        private int[] updatedRoles;
+        private List<int> updatedRoles;
         public bool deleted;
         public bool updated;
         public Actor actorToshow;
@@ -97,11 +97,10 @@ namespace ConsoleProject
             {
                 Actor updated = dialog.GetActor();
                 updated.id = actorToshow.id;
-                this.actorToshow = updated;
                 this.updatedRoles = dialog.GetFilmIds();
                 this.updated = true;
+                SetActor(updated);
             }
-            Application.RequestStop();
         }
         public Actor GetActor()
         {
@@ -113,14 +112,31 @@ namespace ConsoleProject
             this.idField.Text = actor.id.ToString();
             this.fullnameField.Text = actor.fullname;
             this.countryField.Text = actor.country;
+            this.birthdateField.ReadOnly = false;
             this.birthdateField.Date = actor.birthDate;
             this.birthdateField.ReadOnly = true;
-            List<Film> films = ArrayToList(actor.films);
-            this.rolesView.SetSource(films);
+            if(updatedRoles != null)
+            {
+                this.rolesView.SetSource(ListIntToFilm());
+            }
+            else
+            {
+                List<Film> films = ArrayToList(actor.films);
+                this.rolesView.SetSource(films);
+            }
         }
         public void SetRepository(FilmRepository repo)
         {
             this.repo = repo;
+        }
+        private List<Film> ListIntToFilm()
+        {
+            List<Film> films = new List<Film>();
+            foreach(int id in updatedRoles)
+            {
+                films.Add(repo.GetById(id));
+            }
+            return films;
         }
         private List<Film> ArrayToList(Film[] films)
         {
@@ -131,7 +147,7 @@ namespace ConsoleProject
             }
             return result;
         }
-        public int[] GetUpdatedRoles()
+        public List<int> GetUpdatedRoles()
         {
             return this.updatedRoles;
         }

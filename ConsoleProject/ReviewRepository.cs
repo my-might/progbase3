@@ -40,10 +40,9 @@ namespace ConsoleProject
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"UPDATE reviews SET opinion = $opinion, rating = $rating, postedAt = $postedAt, filmId = $filmId WHERE id = $id";
+            command.CommandText = @"UPDATE reviews SET opinion = $opinion, rating = $rating, filmId = $filmId WHERE id = $id";
             command.Parameters.AddWithValue("$opinion", review.opinion);
             command.Parameters.AddWithValue("$rating", review.rating);
-            command.Parameters.AddWithValue("$postedAt", review.postedAt.ToString("o"));
             command.Parameters.AddWithValue("$filmId", review.filmId);
             command.Parameters.AddWithValue("$id", id);
             long result = command.ExecuteNonQuery();

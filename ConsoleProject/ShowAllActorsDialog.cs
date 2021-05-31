@@ -82,7 +82,7 @@ namespace ConsoleProject
             if(dialog.updated)
             {
                 repo.actorRepository.Update((long)actor.id, dialog.GetActor());
-                int[] updatedRoles = dialog.GetUpdatedRoles();
+                List<int> updatedRoles = dialog.GetUpdatedRoles();
                     foreach(int filmId in updatedRoles)
                     {
                         if(!repo.roleRepository.IsExist(filmId, actor.id))
@@ -94,12 +94,15 @@ namespace ConsoleProject
                     foreach(Film film in roles)
                     {
                         bool isExist = false;
-                        for(int i = 0; i<updatedRoles.Length; i++)
+                        if(updatedRoles.Count != 0)
                         {
-                            if(film.id == updatedRoles[i])
+                            for(int i = 0; i<updatedRoles.Count; i++)
                             {
-                                isExist = true;
-                                break;
+                                if(film.id == updatedRoles[i])
+                                {
+                                    isExist = true;
+                                    break;
+                                }
                             }
                         }
                         if(!isExist)

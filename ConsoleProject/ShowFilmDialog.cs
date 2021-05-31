@@ -10,12 +10,13 @@ namespace ConsoleProject
         private TextField descriptionField;
         private TextField yearField;
         private ListView rolesView;
-        private int[] updatedRoles;
+        private List<int> updatedRoles;
         public bool deleted;
         public bool updated;
         public Film filmToShow;
         private ActorRepository repo;
 
+        private bool user;
         
         public ShowFilmDialog()
         {
@@ -63,7 +64,7 @@ namespace ConsoleProject
             };
             this.Add(yearLabel, yearField);
 
-            Label rolesLabel = new Label(2, 10, "Starring actors:");
+            Label rolesLabel = new Label(2, 12, "Starring actors:");
             rolesView = new ListView(new List<Actor>())
             {
                 Width = Dim.Fill(),
@@ -85,7 +86,15 @@ namespace ConsoleProject
                 X = delete.X, Y = 15
             };
             edit.Clicked += OnEditFilm;
-            this.Add(delete, edit);
+            Button showReviews = new Button(2, 14, "Show reviews");
+            if(user)
+            {
+                this.Add(showReviews);
+            }
+            else
+            {
+                this.Add(delete, edit);
+            }
         }
         private void OnDeleteFilm()
         {
@@ -107,11 +116,10 @@ namespace ConsoleProject
             {
                 Film updated = dialog.GetFilm();
                 updated.id = filmToShow.id;
-                this.filmToShow = updated;
                 this.updatedRoles = dialog.GetActorIds();
                 this.updated = true;
+                SetFilm(updated);
             }
-            Application.RequestStop();
         }
         public Film GetFilm()
         {
@@ -125,12 +133,29 @@ namespace ConsoleProject
             this.genreField.Text = film.genre;
             this.descriptionField.Text = film.description;
             this.yearField.Text = film.releaseYear.ToString();
-            List<Actor> actors = ArrayToList(film.actors);
-            this.rolesView.SetSource(actors);
+            if(updatedRoles != null)
+            {
+                this.rolesView.SetSource(ListIntToActor());
+            }
+            else
+            {
+                List<Actor> actors = ArrayToList(film.actors);
+                this.rolesView.SetSource(actors);
+            }
         }
-        public void SetRepository(ActorRepository repo)
+        private List<Actor> ListIntToActor()
+        {
+            List<Actor> actors = new List<Actor>();
+            foreach(int id in updatedRoles)
+            {
+                actors.Add(repo.GetById(id));
+            }
+            return actors;
+        }
+        public void SetService(ActorRepository repo, bool user)
         {
             this.repo = repo;
+            this.user = user;
         }
         private List<Actor> ArrayToList(Actor[] actors)
         {
@@ -141,7 +166,7 @@ namespace ConsoleProject
             }
             return result;
         }
-        public int[] GetUpdatedRoles()
+        public List<int> GetUpdatedRoles()
         {
             return this.updatedRoles;
         }

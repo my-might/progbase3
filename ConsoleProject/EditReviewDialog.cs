@@ -12,5 +12,11 @@ namespace ConsoleProject
             this.inputRating.Text = review.rating.ToString();
             this.inputFilmId.Text = review.filmId.ToString();
         }
+        public Review GetReviewEdit()
+        {
+            return new Review(){opinion = inputOpinion.Text.ToString(),
+                            rating = int.Parse(inputRating.Text.ToString()),
+                            filmId = int.Parse(inputFilmId.Text.ToString())};
+        }
     }
 }

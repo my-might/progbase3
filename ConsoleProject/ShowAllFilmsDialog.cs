@@ -68,7 +68,7 @@ namespace ConsoleProject
             roles.CopyTo(film.actors);
             ShowFilmDialog dialog = new ShowFilmDialog();
             dialog.SetFilm(film);
-            dialog.SetRepository(repo.actorRepository);
+            dialog.SetService(repo.actorRepository, false);
             Application.Run(dialog);
             if(dialog.deleted)
             {
@@ -82,7 +82,7 @@ namespace ConsoleProject
             if(dialog.updated)
             {
                 repo.filmRepository.Update((long)film.id, dialog.GetFilm());
-                int[] updatedRoles = dialog.GetUpdatedRoles();
+                List<int> updatedRoles = dialog.GetUpdatedRoles();
                     foreach(int actorId in updatedRoles)
                     {
                         if(!repo.roleRepository.IsExist(film.id, actorId))
@@ -94,12 +94,15 @@ namespace ConsoleProject
                     foreach(Actor actor in roles)
                     {
                         bool isExist = false;
-                        for(int i = 0; i<updatedRoles.Length; i++)
+                        if(updatedRoles.Count != 0)
                         {
-                            if(actor.id == updatedRoles[i])
+                            for(int i = 0; i<updatedRoles.Count; i++)
                             {
-                                isExist = true;
-                                break;
+                                if(actor.id == updatedRoles[i])
+                                {
+                                    isExist = true;
+                                    break;
+                                }
                             }
                         }
                         if(!isExist)

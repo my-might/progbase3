@@ -67,7 +67,7 @@ namespace ConsoleProject
             delete.Clicked += OnDeleteReview;
             Button edit = new Button("Edit")
             {
-                X = Pos.Right(delete) + 3, Y = 12
+                X = delete.X, Y = 13
             };
             edit.Clicked += OnEditReview;
             this.Add(delete, edit);
@@ -90,10 +90,12 @@ namespace ConsoleProject
 
             if(!dialog.canceled)
             {
-                Review updated = dialog.GetReview();
+                Review updated = dialog.GetReviewEdit();
                 updated.id = reviewToShow.id;
-                this.SetReview(updated);
+                updated.postedAt = reviewToShow.postedAt;
+                updated.userId = reviewToShow.userId;
                 this.updated = true;
+                this.SetReview(updated);
             }
         }
         public Review GetReview()

@@ -40,7 +40,8 @@ namespace ConsoleProject
             Label filmDescription = new Label(2, 6, "Description:");
             inputDescription = new TextField("")
             {
-                X = 20, Y = Pos.Top(filmDescription), Width = Dim.Percent(50)
+                X = 20, Y = Pos.Top(filmDescription), 
+                Width = Dim.Percent(50)
             };
             this.Add(filmDescription, inputDescription);
 
@@ -51,7 +52,7 @@ namespace ConsoleProject
             };
             this.Add(filmRelease, inputRelease);
 
-            Label filmRoles = new Label(2, 8, "Starring actors:");
+            Label filmRoles = new Label(2, 10, "Starring actors:");
             inputRoles = new TextField("")
             {
                 X = 20, Y = Pos.Top(filmRoles), Width = Dim.Percent(50)
@@ -65,11 +66,9 @@ namespace ConsoleProject
                             description = inputDescription.Text.ToString(),
                             releaseYear = int.Parse(inputRelease.Text.ToString())};
         }
-        public int[] GetActorIds()
+        public List<int> GetActorIds()
         {
-            int[] ids = new int[actorIds.Count];
-            actorIds.CopyTo(ids);
-            return ids;
+            return this.actorIds;
         }
         public void SetRepository(ActorRepository repo)
         {
@@ -105,14 +104,14 @@ namespace ConsoleProject
             }
             else
             {
-                string[] ids = inputRoles.Text.ToString().Split(",");
-                if(ids.Length == 0)
+                actorIds = new List<int>();
+                if(inputRoles.Text.ToString() == "")
                 {
                     errorText = "";
                 }
                 else
                 {
-                    actorIds = new List<int>();
+                    string[] ids = inputRoles.Text.ToString().Split(",");
                     for(int i = 0; i<ids.Length; i++)
                     {
                         if(!int.TryParse(ids[i], out int id))

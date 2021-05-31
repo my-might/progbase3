@@ -25,25 +25,10 @@ namespace ConsoleProject
                     new MenuItem ("Help!", "", null)
                 })
             });
-            Window win = new Window("e-database of films and actors")
-            {
-                X = 0,
-                Y = 1,
-                Width = Dim.Fill(),
-                Height = Dim.Fill()
-            };
-
-            Button addEntity = new Button(2, 4, "Create new entity");
-            addEntity.Clicked += ProcessClickCreate;
-            Button showAllEntity = new Button(2, 6, "View all entities");
-            showAllEntity.Clicked += ProcessClickViewAll;
-            Button showEntity = new Button(2, 8, "View entity");
-            showEntity.Clicked += ProcessClickShow;
-            Button editEntity = new Button(2, 10, "Edit entity");
-            editEntity.Clicked += ProcessClickEdit;
-
-            win.Add(addEntity, showAllEntity, showEntity, editEntity);
-            top.Add(win, menu);
+            MainWindowUser user = new MainWindowUser();
+            user.SetService(repo);
+            
+            top.Add(user, menu);
             Application.Run();
         }
         static void OnQuit()
@@ -112,7 +97,7 @@ namespace ConsoleProject
             {
                 Film film = dialog.GetFilm();
                 int insertedId = (int)repo.filmRepository.Insert(film);
-                int[] actorIds = dialog.GetActorIds();
+                List<int> actorIds = dialog.GetActorIds();
                 foreach(int id in actorIds)
                 {
                     Role currentRole = new Role(){actorId = id, filmId = insertedId};
@@ -129,7 +114,7 @@ namespace ConsoleProject
             {
                 Actor actor = dialog.GetActor();
                 int insertedId = (int)repo.actorRepository.Insert(actor);
-                int[] filmIds = dialog.GetFilmIds();
+                List<int> filmIds = dialog.GetFilmIds();
                 foreach(int id in filmIds)
                 {
                     Role currentRole = new Role(){actorId = insertedId, filmId = id};
@@ -221,7 +206,7 @@ namespace ConsoleProject
                 filmToSet.actors = new Actor[roles.Count];
                 roles.CopyTo(filmToSet.actors);
                 dialog.SetFilm(filmToSet);
-                dialog.SetRepository(repo.actorRepository);
+                dialog.SetService(repo.actorRepository, false);
                 Application.Run(dialog);
                 if(dialog.deleted)
                 {
@@ -231,7 +216,7 @@ namespace ConsoleProject
                 if(dialog.updated)
                 {
                     repo.filmRepository.Update((long) id, dialog.GetFilm());
-                    int[] updatedRoles = dialog.GetUpdatedRoles();
+                    List<int> updatedRoles = dialog.GetUpdatedRoles();
                     foreach(int actorId in updatedRoles)
                     {
                         if(!repo.roleRepository.IsExist(filmToSet.id, actorId))
@@ -243,12 +228,15 @@ namespace ConsoleProject
                     foreach(Actor actor in roles)
                     {
                         bool isExist = false;
-                        for(int i = 0; i<updatedRoles.Length; i++)
+                        if(updatedRoles.Count != 0)
                         {
-                            if(actor.id == updatedRoles[i])
+                            for(int i = 0; i<updatedRoles.Count; i++)
                             {
-                                isExist = true;
-                                break;
+                                if(actor.id == updatedRoles[i])
+                                {
+                                    isExist = true;
+                                    break;
+                                }
                             }
                         }
                         if(!isExist)
@@ -298,7 +286,7 @@ namespace ConsoleProject
                 if(dialog.updated)
                 {
                     repo.actorRepository.Update((long) id, dialog.GetActor());
-                    int[] updatedRoles = dialog.GetUpdatedRoles();
+                    List<int> updatedRoles = dialog.GetUpdatedRoles();
                     foreach(int filmId in updatedRoles)
                     {
                         if(!repo.roleRepository.IsExist(filmId, actorToSet.id))
@@ -310,12 +298,15 @@ namespace ConsoleProject
                     foreach(Film film in roles)
                     {
                         bool isExist = false;
-                        for(int i = 0; i<updatedRoles.Length; i++)
+                        if(updatedRoles.Count != 0)
                         {
-                            if(film.id == updatedRoles[i])
+                            for(int i = 0; i<updatedRoles.Count; i++)
                             {
-                                isExist = true;
-                                break;
+                                if(film.id == updatedRoles[i])
+                                {
+                                    isExist = true;
+                                    break;
+                                }
                             }
                         }
                         if(!isExist)
@@ -423,7 +414,7 @@ namespace ConsoleProject
                 if(!dialog.canceled)
                 {
                     repo.filmRepository.Update((long) id, dialog.GetFilm());
-                    int[] updatedRoles = dialog.GetActorIds();
+                    List<int> updatedRoles = dialog.GetActorIds();
                     foreach(int actorId in updatedRoles)
                     {
                         if(!repo.roleRepository.IsExist(filmToSet.id, actorId))
@@ -435,12 +426,15 @@ namespace ConsoleProject
                     foreach(Actor actor in roles)
                     {
                         bool isExist = false;
-                        for(int i = 0; i<updatedRoles.Length; i++)
+                        if(updatedRoles.Count != 0)
                         {
-                            if(actor.id == updatedRoles[i])
+                            for(int i = 0; i<updatedRoles.Count; i++)
                             {
-                                isExist = true;
-                                break;
+                                if(actor.id == updatedRoles[i])
+                                {
+                                    isExist = true;
+                                    break;
+                                }
                             }
                         }
                         if(!isExist)
@@ -485,7 +479,7 @@ namespace ConsoleProject
                 if(!dialog.canceled)
                 {
                     repo.actorRepository.Update((long) id, dialog.GetActor());
-                    int[] updatedRoles = dialog.GetFilmIds();
+                    List<int> updatedRoles = dialog.GetFilmIds();
                     foreach(int filmId in updatedRoles)
                     {
                         if(!repo.roleRepository.IsExist(filmId, actorToSet.id))
@@ -497,12 +491,19 @@ namespace ConsoleProject
                     foreach(Film film in roles)
                     {
                         bool isExist = false;
-                        for(int i = 0; i<updatedRoles.Length; i++)
+                        if(updatedRoles.Count == 0)
                         {
-                            if(film.id == updatedRoles[i])
+                            isExist = false;
+                        }
+                        else
+                        {
+                            for(int i = 0; i<updatedRoles.Count; i++)
                             {
-                                isExist = true;
-                                break;
+                                if(film.id == updatedRoles[i])
+                                {
+                                    isExist = true;
+                                    break;
+                                }
                             }
                         }
                         if(!isExist)
@@ -537,7 +538,8 @@ namespace ConsoleProject
             else
             {
                 EditReviewDialog dialog = new EditReviewDialog();
-                dialog.SetReview(repo.reviewRepository.GetById(id));
+                Review toEdit = repo.reviewRepository.GetById(id);
+                dialog.SetReview(toEdit);
                 dialog.SetService(repo);
                 Application.Run(dialog);
                 if(!dialog.canceled)

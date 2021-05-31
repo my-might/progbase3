@@ -57,11 +57,9 @@ namespace ConsoleProject
                             birthDate = DateTime.Parse(inputBirthDate.Text.ToString())
                             };
         }
-        public int[] GetFilmIds()
+        public List<int> GetFilmIds()
         {
-            int[] ids = new int[filmIds.Count];
-            filmIds.CopyTo(ids);
-            return ids;
+            return this.filmIds;
         }
         public void SetRepository(FilmRepository repo)
         {
@@ -89,18 +87,18 @@ namespace ConsoleProject
             }
             else if(!DateTime.TryParse(inputBirthDate.Text.ToString(), out DateTime birthDate) || birthDate > DateTime.Now)
             {
-                errorText = $"Birth date must be less than {DateTime.Now.ToString("o")}.";
+                errorText = $"Birth date must be less than {DateTime.Now.ToString()}.";
             }
             else
             {
-                string[] ids = inputRoles.Text.ToString().Split(",");
-                if(ids.Length == 0)
+                filmIds = new List<int>();
+                if(inputRoles.Text.ToString() == "")
                 {
                     errorText = "";
                 }
                 else
                 {
-                    filmIds = new List<int>();
+                    string[] ids = inputRoles.Text.ToString().Split(",");
                     for(int i = 0; i<ids.Length; i++)
                     {
                         if(!int.TryParse(ids[i], out int id))
