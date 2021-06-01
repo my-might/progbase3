@@ -14,7 +14,7 @@ namespace ConsoleProject
         public bool deleted;
         public bool updated;
         public Film filmToShow;
-        private ActorRepository repo;
+        private Service repo;
 
         private bool user;
         
@@ -87,14 +87,11 @@ namespace ConsoleProject
             };
             edit.Clicked += OnEditFilm;
             Button showReviews = new Button(2, 14, "Show reviews");
-            if(user)
-            {
-                this.Add(showReviews);
-            }
-            else
-            {
-                this.Add(delete, edit);
-            }
+            showReviews.Clicked += OnShowReviews;
+            this.Add(delete, edit, showReviews);
+            delete.Visible = (user = false);
+            edit.Visible = (user = false);
+            showReviews.Visible = (user = true);
         }
         private void OnDeleteFilm()
         {
@@ -105,11 +102,17 @@ namespace ConsoleProject
                 Application.RequestStop();
             }
         }
+        private void OnShowReviews()
+        {
+            ShowFilmReviews dialog = new ShowFilmReviews();
+            dialog.SetRepository(repo, true, filmToShow.id);
+            Application.Run(dialog);
+        }
         private void OnEditFilm()
         {
             EditFilmDialog dialog = new EditFilmDialog();
             dialog.SetFilm(this.filmToShow);
-            dialog.SetRepository(this.repo);
+            dialog.SetRepository(this.repo.actorRepository);
             Application.Run(dialog);
 
             if(!dialog.canceled)
@@ -148,11 +151,11 @@ namespace ConsoleProject
             List<Actor> actors = new List<Actor>();
             foreach(int id in updatedRoles)
             {
-                actors.Add(repo.GetById(id));
+                actors.Add(repo.actorRepository.GetById(id));
             }
             return actors;
         }
-        public void SetService(ActorRepository repo, bool user)
+        public void SetService(Service repo, bool user)
         {
             this.repo = repo;
             this.user = user;

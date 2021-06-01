@@ -68,7 +68,7 @@ namespace ConsoleProject
             roles.CopyTo(film.actors);
             ShowFilmDialog dialog = new ShowFilmDialog();
             dialog.SetFilm(film);
-            dialog.SetService(repo.actorRepository, false);
+            dialog.SetService(repo, true);
             Application.Run(dialog);
             if(dialog.deleted)
             {

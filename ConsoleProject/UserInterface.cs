@@ -18,7 +18,7 @@ namespace ConsoleProject
             MenuBar menu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem ("_File", new MenuItem [] {
                     new MenuItem ("_Export Films", "", Export),
-                    new MenuItem ("_Import Films", "", null),
+                    new MenuItem ("_Import Films", "", Import),
                     new MenuItem ("_Exit", "", OnQuit)
                 }),
                 new MenuBarItem ("_Help", new MenuItem [] {
@@ -44,6 +44,23 @@ namespace ConsoleProject
             {
                 Xml xml = new Xml(repo.filmRepository);
                 xml.ExportData(repo.roleRepository.GetAllFilms(int.Parse(dialog.actorIdField.Text.ToString())), dialog.directory.Text.ToString());
+            }
+        }
+        static void Import()
+        {
+            Import dialog = new Import();
+            Application.Run(dialog);
+            if(!dialog.canceled)
+            {
+                Xml xml = new Xml(repo.filmRepository);
+                try
+                {
+                    xml.ImportData(dialog.directory.Text.ToString());
+                }
+                catch
+                {
+                    MessageBox.ErrorQuery("Error", "Cannot import data", "OK");
+                }
             }
         }
         static void ProcessClickCreate()
@@ -206,7 +223,7 @@ namespace ConsoleProject
                 filmToSet.actors = new Actor[roles.Count];
                 roles.CopyTo(filmToSet.actors);
                 dialog.SetFilm(filmToSet);
-                dialog.SetService(repo.actorRepository, false);
+                dialog.SetService(repo, false);
                 Application.Run(dialog);
                 if(dialog.deleted)
                 {

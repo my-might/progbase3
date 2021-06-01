@@ -72,6 +72,26 @@ namespace ConsoleProject
             connection.Close();
             return user;
         }
+        public User GetByUsername(string username)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM users WHERE username = $username";
+            command.Parameters.AddWithValue("$username", username);
+            SqliteDataReader reader = command.ExecuteReader();
+            User user = new User();
+            if(reader.Read())
+            {
+                user = GetUser(reader);
+            }
+            else
+            {
+                user = null;
+            }
+            reader.Close();
+            connection.Close();
+            return user;
+        }
         public List<User> GetAll()
         {
             connection.Open();

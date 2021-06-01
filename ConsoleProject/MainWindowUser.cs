@@ -93,7 +93,7 @@ namespace ConsoleProject
                 filmToSet.actors = new Actor[roles.Count];
                 roles.CopyTo(filmToSet.actors);
                 dialog.SetFilm(filmToSet);
-                dialog.SetService(repo.actorRepository, true);
+                dialog.SetService(repo, true);
                 Application.Run(dialog);
             }
         }
