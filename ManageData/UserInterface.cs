@@ -238,7 +238,8 @@ namespace ManageData
                 filmToSet.actors = new Actor[roles.Count];
                 roles.CopyTo(filmToSet.actors);
                 dialog.SetFilm(filmToSet);
-                dialog.SetService(repo, false);
+                dialog.SetService(repo);
+                //dialog.SetUser(user);
                 Application.Run(dialog);
                 if(dialog.deleted)
                 {

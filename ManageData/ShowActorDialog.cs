@@ -15,6 +15,9 @@ namespace ManageData
         public bool updated;
         public Actor actorToshow;
         private FilmRepository repo;
+        private User user;
+        private Button delete;
+        private Button edit;
         
         public ShowActorDialog()
         {
@@ -68,9 +71,9 @@ namespace ManageData
             frameView.Add(rolesView);
             this.Add(rolesLabel, frameView);
 
-            Button delete = new Button(2, 13, "Delete");
+            delete = new Button(2, 13, "Delete");
             delete.Clicked += OnDeleteActor;
-            Button edit = new Button("Edit")
+            edit = new Button("Edit")
             {
                 X = delete.X, Y = 15
             };
@@ -95,6 +98,7 @@ namespace ManageData
 
             if(!dialog.canceled)
             {
+                MessageBox.Query("Edit", "Actor was updated!", "OK");
                 Actor updated = dialog.GetActor();
                 updated.id = actorToshow.id;
                 this.updatedRoles = dialog.GetFilmIds();
@@ -115,19 +119,34 @@ namespace ManageData
             this.birthdateField.ReadOnly = false;
             this.birthdateField.Date = actor.birthDate;
             this.birthdateField.ReadOnly = true;
-            if(updatedRoles != null)
+            if(updatedRoles != null && updatedRoles.Count != 0)
             {
                 this.rolesView.SetSource(ListIntToFilm());
             }
-            else
+            else if(actor.films.Length != 0)
             {
                 List<Film> films = ArrayToList(actor.films);
                 this.rolesView.SetSource(films);
+            }
+            else
+            {
+                List<string> emptyText = new List<string>();
+                emptyText.Add("There are no films.");
+                this.rolesView.SetSource(emptyText);
             }
         }
         public void SetRepository(FilmRepository repo)
         {
             this.repo = repo;
+        }
+        public void SetUser(User user)
+        {
+            this.user = user;
+            if(user.isModerator == 0)
+            {
+                delete.Visible = false;
+                edit.Visible = false;
+            }
         }
         private List<Film> ListIntToFilm()
         {

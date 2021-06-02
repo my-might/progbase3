@@ -8,7 +8,7 @@ namespace ManageData
     {
         private Service repo;
         private ListView allReviews;
-        private bool user;
+        private User user;
         private int filmId;
         public ShowFilmReviews()
         {
@@ -36,25 +36,31 @@ namespace ManageData
         }
         private void OnOpenReview(ListViewItemEventArgs args)
         {
-            Review review = (Review)args.Value;
+            Review review = new Review();
+            try
+            {
+                review = (Review)args.Value; 
+            }
+            catch
+            {
+                return;
+            }
             ShowReviewDialog dialog = new ShowReviewDialog();
             dialog.SetService(repo);
             dialog.SetReview(review);
+            dialog.SetUser(user);
             Application.Run(dialog);
-            if(!user)
+            if(dialog.deleted)
             {
-                if(dialog.deleted)
-                {
-                    repo.reviewRepository.DeleteById(review.id);
-                }
-                if(dialog.updated)
-                {
-                    repo.reviewRepository.Update((long)review.id, dialog.GetReview());
-                }
+                repo.reviewRepository.DeleteById(review.id);
+            }
+            if(dialog.updated)
+            {
+                repo.reviewRepository.Update((long)review.id, dialog.GetReview());
             }
             ShowCurrentPage();
         }
-        public void SetRepository(Service repo, bool user, int filmId)
+        public void SetRepository(Service repo, User user, int filmId)
         {
             this.repo = repo;
             this.user = user;
@@ -63,7 +69,17 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            this.allReviews.SetSource(repo.reviewRepository.GetAllFilmReviews(filmId));
+            List<Review> reviews = repo.reviewRepository.GetAllFilmReviews(filmId);
+            if(reviews.Count != 0)
+            {
+                this.allReviews.SetSource(reviews);
+            }
+            else
+            {
+                List<string> emptyText = new List<string>();
+                emptyText.Add("There are no reviews for this film.");
+                this.allReviews.SetSource(emptyText);
+            }
         }
         private void DialogCanceled()
         {

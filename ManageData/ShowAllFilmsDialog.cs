@@ -11,6 +11,7 @@ namespace ManageData
         private Label currentPageLabel;
         private TextField searchPage;
         private ListView allFilms;
+        private User currentUser;
         public ShowAllFilmsDialog()
         {
             Button ok = new Button("OK");
@@ -63,13 +64,22 @@ namespace ManageData
         }
         private void OnOpenFilm(ListViewItemEventArgs args)
         {
-            Film film = (Film)args.Value;
+            Film film = new Film();
+            try
+            {
+                film = (Film)args.Value;
+            }
+            catch
+            {
+                return;
+            }
             List<Actor> roles = repo.roleRepository.GetAllActors(film.id);
             film.actors = new Actor[roles.Count];
             roles.CopyTo(film.actors);
             ShowFilmDialog dialog = new ShowFilmDialog();
+            dialog.SetService(repo);
             dialog.SetFilm(film);
-            dialog.SetService(repo, true);
+            dialog.SetUser(currentUser);
             Application.Run(dialog);
             if(dialog.deleted)
             {
@@ -149,6 +159,10 @@ namespace ManageData
             this.repo = repo;
             ShowCurrentPage();
         }
+        public void SetUser(User user)
+        {
+            this.currentUser = user;
+        }
         private void ClickPrevPage()
         {
             if(page == 1)
@@ -170,9 +184,22 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            this.currentPageLabel.Text = this.page.ToString();
-            this.totalPagesLabel.Text = repo.filmRepository.GetTotalPages().ToString();
-            this.allFilms.SetSource(repo.filmRepository.GetPage(page));
+            int totalPages = repo.filmRepository.GetTotalPages();
+            if(totalPages == 0)
+            {
+                this.page = 0;
+                this.currentPageLabel.Text = this.page.ToString();
+                this.totalPagesLabel.Text = totalPages.ToString();
+                List<string> emptyText = new List<string>();
+                emptyText.Add("There are no films in the database.");
+                this.allFilms.SetSource(emptyText);
+            }
+            else
+            {
+                this.currentPageLabel.Text = this.page.ToString();
+                this.totalPagesLabel.Text = totalPages.ToString();
+                this.allFilms.SetSource(repo.filmRepository.GetPage(page));
+            }
         }
         private void DialogCanceled()
         {

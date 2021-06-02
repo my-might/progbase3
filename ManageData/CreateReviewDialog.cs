@@ -46,12 +46,16 @@ namespace ManageData
         {
             this.repo = repo;
         }
+        public void CreateForFilm(int filmId)
+        {
+            this.inputFilmId.Text = filmId.ToString();
+            this.inputFilmId.ReadOnly = true;
+        }
         public Review GetReview()
         {
             return new Review(){opinion = inputOpinion.Text.ToString(),
                             rating = int.Parse(inputRating.Text.ToString()),
                             postedAt = DateTime.Now,
-                            userId = 1,
                             filmId = int.Parse(inputFilmId.Text.ToString())};
         }
         private void DialogCanceled()
@@ -93,6 +97,7 @@ namespace ManageData
             else
             {
                 this.canceled = false;
+                MessageBox.Query("Write review", "Review was created!", "OK");
                 Application.RequestStop();
             }
         }

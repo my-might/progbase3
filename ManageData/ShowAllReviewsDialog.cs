@@ -63,7 +63,15 @@ namespace ManageData
         }
         private void OnOpenReview(ListViewItemEventArgs args)
         {
-            Review review = (Review)args.Value;
+            Review review = new Review();
+            try
+            {
+                review = (Review)args.Value;
+            }
+            catch
+            {
+                return;
+            }
             ShowReviewDialog dialog = new ShowReviewDialog();
             dialog.SetService(repo);
             dialog.SetReview(review);
@@ -138,9 +146,22 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            this.currentPageLabel.Text = this.page.ToString();
-            this.totalPagesLabel.Text = repo.reviewRepository.GetTotalPages().ToString();
-            this.allReviews.SetSource(repo.reviewRepository.GetPage(page));
+            int totalPages = repo.reviewRepository.GetTotalPages();
+            if(totalPages == 0)
+            {
+                this.page = 0;
+                this.currentPageLabel.Text = this.page.ToString();
+                this.totalPagesLabel.Text = totalPages.ToString();
+                List<string> emptyText = new List<string>();
+                emptyText.Add("There are no reviews in the database.");
+                this.allReviews.SetSource(emptyText);
+            }
+            else
+            {
+                this.currentPageLabel.Text = this.page.ToString();
+                this.totalPagesLabel.Text = totalPages.ToString();
+                this.allReviews.SetSource(repo.reviewRepository.GetPage(page));
+            }
         }
         private void DialogCanceled()
         {

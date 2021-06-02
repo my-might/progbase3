@@ -9,11 +9,15 @@ namespace ManageData
         private TextField ratingField;
         private DateField postedAtDateField;
         private TimeField postedAtTimeField;
-        private TextField filmIdField;
+        private TextField filmField;
+        private TextField userField;
         public bool deleted;
         public bool updated;
-        public Review reviewToShow;
+        private Review reviewToShow;
         private Service repo;
+        private User user;
+        private Button delete;
+        private Button edit;
         public ShowReviewDialog()
         {
             this.Title = "Show review";
@@ -57,18 +61,27 @@ namespace ManageData
             };
             this.Add(postedAtLable, postedAtDateField, postedAtTimeField);
 
-            Label filmIdLabel = new Label(2, 12, "Film id:");
-            filmIdField = new TextField("")
+            Label filmLabel = new Label(2, 12, "For film:");
+            filmField = new TextField("")
             {
-                X = 20, Y = Pos.Top(filmIdLabel), Width = Dim.Percent(50),
+                X = 20, Y = Pos.Top(filmLabel), Width = Dim.Percent(50),
                 ReadOnly = true
             };
-            this.Add(filmIdLabel, filmIdField);
-            Button delete = new Button(2, 14, "Delete");
-            delete.Clicked += OnDeleteReview;
-            Button edit = new Button("Edit")
+            this.Add(filmLabel, filmField);
+
+            Label userLabel = new Label(2, 14, "By user:");
+            userField = new TextField("")
             {
-                X = delete.X, Y = 15
+                X = 20, Y = Pos.Top(userLabel), Width = Dim.Percent(50),
+                ReadOnly = true
+            };
+            this.Add(userLabel, userField);
+
+            delete = new Button(2, 16, "Delete");
+            delete.Clicked += OnDeleteReview;
+            edit = new Button("Edit")
+            {
+                X = delete.X, Y = 17
             };
             edit.Clicked += OnEditReview;
             this.Add(delete, edit);
@@ -91,10 +104,12 @@ namespace ManageData
 
             if(!dialog.canceled)
             {
+                MessageBox.Query("Edit", "Review was updated!", "OK");
                 Review updated = dialog.GetReviewEdit();
                 updated.id = reviewToShow.id;
                 updated.postedAt = reviewToShow.postedAt;
                 updated.userId = reviewToShow.userId;
+                updated.filmId = reviewToShow.filmId;
                 this.updated = true;
                 this.SetReview(updated);
             }
@@ -107,7 +122,25 @@ namespace ManageData
         {
             this.repo = repo;
         }
-
+        public void SetUser(User user)
+        {
+            this.user = user;
+            if(user.id == reviewToShow.userId)
+            {
+                delete.Visible = true;
+                edit.Visible = true;
+            }
+            else if(user.isModerator == 1)
+            {
+                delete.Visible = true;
+                edit.Visible = false;
+            }
+            else
+            {
+                delete.Visible = false;
+                edit.Visible = false;
+            }
+        }
         public void SetReview(Review review)
         {
             this.reviewToShow = review;
@@ -118,7 +151,8 @@ namespace ManageData
             this.postedAtDateField.ReadOnly = true;
             this.postedAtTimeField.Time = review.postedAt.TimeOfDay;
             this.postedAtTimeField.ReadOnly = true;
-            this.filmIdField.Text = review.filmId.ToString();
+            this.filmField.Text = repo.filmRepository.GetById(review.filmId).ToString();
+            this.userField.Text = repo.userRepository.GetById(review.userId).username.ToString();
         }
         private void DialogCanceled()
         {

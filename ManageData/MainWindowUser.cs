@@ -46,6 +46,7 @@ namespace ManageData
                 X = Pos.Center() - 20, Y = 12
             };
             createReview.Clicked += ClickCreateReview;
+
             this.Add(profile, viewFilms, viewActors, createReview);
             Label idLabel = new Label("ID:")
             {
@@ -109,13 +110,27 @@ namespace ManageData
                 Review review = dialog.GetReview();
                 review.userId = currentUser.id;
                 repo.reviewRepository.Insert(review);
+                ShowReviewDialog showDialog = new ShowReviewDialog();
+                showDialog.SetService(repo);
+                showDialog.SetReview(review);
+                showDialog.SetUser(currentUser);
+                Application.Run(dialog);
+                if(showDialog.deleted)
+                {
+                    repo.reviewRepository.DeleteById(review.id);
+                }
+                if(showDialog.updated)
+                {
+                    repo.reviewRepository.Update((long)review.id, dialog.GetReview());
+                }
             }
         }
         private void ClickShowProfile()
         {
-            List<Review> userReviews = repo.reviewRepository.GetAllUserReviews(currentUser.id);
             ShowProfileDialog dialog = new ShowProfileDialog();
-            dialog.SetUser(currentUser, userReviews);
+            dialog.SetService(repo);
+            dialog.SetUser(currentUser);
+            dialog.SetReviews();
             Application.Run(dialog);
         }
         private void ClickFindFilm()
@@ -147,7 +162,8 @@ namespace ManageData
                 filmToSet.actors = new Actor[roles.Count];
                 roles.CopyTo(filmToSet.actors);
                 dialog.SetFilm(filmToSet);
-                dialog.SetService(repo, true);
+                dialog.SetService(repo);
+                dialog.SetUser(currentUser);
                 Application.Run(dialog);
             }
         }
@@ -188,12 +204,14 @@ namespace ManageData
         {
             ShowAllFilmsDialog dialog = new ShowAllFilmsDialog();
             dialog.SetRepository(repo);
+            dialog.SetUser(currentUser);
             Application.Run(dialog);
         }
         private void ClickShowActors()
         {
             ShowAllActorsDialog dialog = new ShowAllActorsDialog();
             dialog.SetRepository(repo);
+            dialog.SetUser(currentUser);
             Application.Run(dialog);
         }
         public void SetService(Service repo)

@@ -16,9 +16,9 @@ namespace ManageData
         public bool updated;
         public Film filmToShow;
         private Service repo;
-
-        private bool user;
-        
+        private User user;
+        private Button delete;
+        private Button edit;
         public ShowFilmDialog()
         {
             this.Title = "Show film";
@@ -80,19 +80,18 @@ namespace ManageData
             frameView.Add(rolesView);
             this.Add(rolesLabel, frameView);
 
-            Button delete = new Button(2, 14, "Delete");
+            delete = new Button(2, 14, "Delete");
             delete.Clicked += OnDeleteFilm;
-            Button edit = new Button("Edit")
+            edit = new Button("Edit")
             {
                 X = delete.X, Y = 15
             };
             edit.Clicked += OnEditFilm;
-            Button showReviews = new Button(2, 15, "Show reviews");
+            Button showReviews = new Button(2, 16, "Show reviews");
             showReviews.Clicked += OnShowReviews;
-            this.Add(delete, edit, showReviews);
-            delete.Visible = (user = false);
-            edit.Visible = (user = false);
-            showReviews.Visible = (user = true);
+            Button createReview = new Button(2, 17, "Write review");
+            createReview.Clicked += OnWriteReview;
+            this.Add(delete, edit, showReviews, createReview);
         }
         private void OnDeleteFilm()
         {
@@ -103,10 +102,23 @@ namespace ManageData
                 Application.RequestStop();
             }
         }
+        private void OnWriteReview()
+        {
+            CreateReviewDialog dialog = new CreateReviewDialog();
+            dialog.SetService(repo);
+            dialog.CreateForFilm(filmToShow.id);
+            Application.Run(dialog);
+            if(!dialog.canceled)
+            {
+                Review review = dialog.GetReview();
+                review.userId = user.id;
+                repo.reviewRepository.Insert(review);
+            }
+        }
         private void OnShowReviews()
         {
             ShowFilmReviews dialog = new ShowFilmReviews();
-            dialog.SetRepository(repo, true, filmToShow.id);
+            dialog.SetRepository(repo, user, filmToShow.id);
             Application.Run(dialog);
         }
         private void OnEditFilm()
@@ -118,6 +130,7 @@ namespace ManageData
 
             if(!dialog.canceled)
             {
+                MessageBox.Query("Edit", "Film was updated!", "OK");
                 Film updated = dialog.GetFilm();
                 updated.id = filmToShow.id;
                 this.updatedRoles = dialog.GetActorIds();
@@ -137,14 +150,20 @@ namespace ManageData
             this.genreField.Text = film.genre;
             this.descriptionField.Text = film.description;
             this.yearField.Text = film.releaseYear.ToString();
-            if(updatedRoles != null)
+            if(updatedRoles != null && updatedRoles.Count != 0)
             {
                 this.rolesView.SetSource(ListIntToActor());
             }
-            else
+            else if(film.actors.Length != 0)
             {
                 List<Actor> actors = ArrayToList(film.actors);
                 this.rolesView.SetSource(actors);
+            }
+            else
+            {
+                List<string> emptyText = new List<string>();
+                emptyText.Add("There are no actors.");
+                this.rolesView.SetSource(emptyText);
             }
         }
         private List<Actor> ListIntToActor()
@@ -156,10 +175,18 @@ namespace ManageData
             }
             return actors;
         }
-        public void SetService(Service repo, bool user)
+        public void SetService(Service repo)
         {
             this.repo = repo;
+        }
+        public void SetUser(User user)
+        {
             this.user = user;
+            if(user.isModerator == 0)
+            {
+                delete.Visible = false;
+                edit.Visible = false;
+            }
         }
         private List<Actor> ArrayToList(Actor[] actors)
         {

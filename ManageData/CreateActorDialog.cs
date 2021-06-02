@@ -128,6 +128,7 @@ namespace ManageData
             else
             {
                 this.canceled = false;
+                MessageBox.Query("Write review", "Actor was created!", "OK");
                 Application.RequestStop();
             }
         }

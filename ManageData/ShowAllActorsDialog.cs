@@ -11,6 +11,7 @@ namespace ManageData
         private Label currentPageLabel;
         private TextField searchPage;
         private ListView allActors;
+        private User user;
         public ShowAllActorsDialog()
         {
             Button ok = new Button("OK");
@@ -63,13 +64,22 @@ namespace ManageData
         }
         private void OnOpenActor(ListViewItemEventArgs args)
         {
-            Actor actor = (Actor)args.Value;
+            Actor actor = new Actor();
+            try
+            {
+                actor = (Actor)args.Value;
+            }
+            catch
+            {
+                return;
+            }
             List<Film> roles = repo.roleRepository.GetAllFilms(actor.id);
             actor.films = new Film[roles.Count];
             roles.CopyTo(actor.films);
             ShowActorDialog dialog = new ShowActorDialog();
             dialog.SetActor(actor);
             dialog.SetRepository(repo.filmRepository);
+            dialog.SetUser(user);
             Application.Run(dialog);
             if(dialog.deleted)
             {
@@ -149,6 +159,10 @@ namespace ManageData
             this.repo = repo;
             ShowCurrentPage();
         }
+        public void SetUser(User user)
+        {
+            this.user = user;
+        }
         private void ClickPrevPage()
         {
             if(page == 1)
@@ -170,9 +184,22 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            this.currentPageLabel.Text = this.page.ToString();
-            this.totalPagesLabel.Text = repo.actorRepository.GetTotalPages().ToString();
-            this.allActors.SetSource(repo.actorRepository.GetPage(page));
+            int totalPages = repo.actorRepository.GetTotalPages();
+            if(totalPages == 0)
+            {
+                this.page = 0;
+                this.currentPageLabel.Text = this.page.ToString();
+                this.totalPagesLabel.Text = totalPages.ToString();
+                List<string> emptyText = new List<string>();
+                emptyText.Add("There are no actors in the database.");
+                this.allActors.SetSource(emptyText);
+            }
+            else
+            {
+                this.currentPageLabel.Text = this.page.ToString();
+                this.totalPagesLabel.Text = totalPages.ToString();
+                this.allActors.SetSource(repo.actorRepository.GetPage(page));
+            }
         }
         private void DialogCanceled()
         {

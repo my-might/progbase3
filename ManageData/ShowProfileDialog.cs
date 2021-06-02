@@ -12,6 +12,8 @@ namespace ManageData
         private TimeField time;
         private TextField role;
         private ListView reviews;
+        private User user;
+        private Service repo;
         public ShowProfileDialog()
         {
             this.Title = "My profile";
@@ -72,8 +74,13 @@ namespace ManageData
             frameView.Add(reviews);
             this.Add(reviewsLabel, frameView);
         }
-        public void SetUser(User user, List<Review> reviews)
+        public void SetService(Service repo)
         {
+            this.repo = repo;
+        }
+        public void SetUser(User user)
+        {
+            this.user = user;
             this.username.Text = user.username;
             this.fullname.Text = user.fullname;
             this.date.Date = user.registrationDate.Date;
@@ -88,6 +95,10 @@ namespace ManageData
             {
                 this.role.Text = "moderator";
             }
+        }
+        public void SetReviews()
+        {
+            List<Review> reviews = repo.reviewRepository.GetAllUserReviews(user.id);
             if(reviews.Count == 0)
             {
                 List<string> emptyText = new List<string>();
@@ -101,10 +112,29 @@ namespace ManageData
         }
         private void OnOpenReview(ListViewItemEventArgs args)
         {
-            Review currentReview = (Review)args.Value;
+            Review currentReview = new Review();
+            try
+            {
+                currentReview = (Review)args.Value;
+            }
+            catch
+            {
+                return;
+            }
             ShowReviewDialog dialog = new ShowReviewDialog();
+            dialog.SetService(repo);
             dialog.SetReview(currentReview);
+            dialog.SetUser(user);
             Application.Run(dialog);
+            if(dialog.deleted)
+            {
+                repo.reviewRepository.DeleteById(currentReview.id);
+            }
+            if(dialog.updated)
+            {
+                repo.reviewRepository.Update((long) currentReview.id, dialog.GetReview());
+            }
+            SetReviews();
         }
         private void DialogCanceled()
         {
