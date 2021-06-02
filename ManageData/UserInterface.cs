@@ -3,69 +3,54 @@ using System.Collections.Generic;
 using ClassLib;
 namespace ManageData
 {
-    public class UserInterface
+    public static class UserInterface
     {
-        private Service repo;
-        private TextField idToShow;
+        private static Service repo;
         
-        public UserInterface(Service repo)
+        private static TextField idToShow;
+        private static Toplevel top;
+        
+        public static void SetService(Service repo1)
         {
-            this.repo = repo;
+            repo = repo1;
         }
-        public void MainWindow()
+        public static void ProcessApplication()
         {
             Application.Init();
-            Toplevel top = Application.Top;
-
-            MenuBar menu = new MenuBar(new MenuBarItem[] {
-                new MenuBarItem ("_File", new MenuItem [] {
-                    new MenuItem ("_Export Films", "", Export),
-                    new MenuItem ("_Import Films", "", Import),
-                    new MenuItem ("_Exit", "", OnQuit)
-                }),
-                new MenuBarItem ("_Help", new MenuItem [] {
-                    new MenuItem ("Help!", "", null)
-                })
-            });
-            Window win = new Window("Aurhorization");
-            Label info = new Label("Log in or register first")
-            {
-                X = Pos.Center(), Y = 5
-            };
-            Button reg = new Button("Register")
-            {
-                X = Pos.Center(), Y = 6
-            };
-            reg.Clicked += OnRegistration;
-            Button log = new Button("Log in")
-            {
-                X = Pos.Center(), Y = 9
-            };
-            log.Clicked += OnLogin;
-            
-            win.Add(info, reg, log);
-            top.Add(win, menu);
-            Application.Run();
+            top = Application.Top;
+            ProcessRegistration();
         }
-        public void OnQuit()
+        private static void OnQuit()
         {
             Application.RequestStop();
         }
-        private void OnRegistration()
+        public static void ProcessRegistration()
         {
             RegistrationDialog dialog = new RegistrationDialog();
-            Application.Run(dialog);
+            dialog.SetRepository(repo.userRepository);
+            top.Add(dialog);
+            Application.Run();
             if(!dialog.canceled)
             {
-                MainWindowUser user = new MainWindowUser();
-                user.SetService(repo);
+                User registered = dialog.GetUser();
+                MenuBar menu = new MenuBar(new MenuBarItem[] {
+                    new MenuBarItem ("_File", new MenuItem [] {
+                        new MenuItem ("_Export Films", "", Export),
+                        new MenuItem ("_Import Films", "", Import),
+                        new MenuItem ("_Exit", "", OnQuit)
+                    }),
+                    new MenuBarItem ("_Help", new MenuItem [] {
+                        new MenuItem ("Help!", "", null)
+                    })
+                });
+                MainWindowUser userWin = new MainWindowUser();
+                userWin.SetService(repo);
+                userWin.SetUser(registered);
+                top.Add(userWin, menu);
+                Application.Run();
             }
         }
-        private void OnLogin()
-        {
-
-        }
-        public void Export()
+        public static void Export()
         {
             Export dialog = new Export();
             dialog.SetRepository(repo.actorRepository);
@@ -76,7 +61,7 @@ namespace ManageData
                 Xml.ExportData(repo.roleRepository.GetAllFilms(int.Parse(dialog.actorIdField.Text.ToString())), dialog.directory.Text.ToString());
             }
         }
-        public void Import()
+        public static void Import()
         {
             Import dialog = new Import();
             Application.Run(dialog);
@@ -93,7 +78,7 @@ namespace ManageData
                 }
             }
         }
-        public void ProcessClickCreate()
+        public static void ProcessClickCreate()
         {
             Window win = new Window("Select entity")
             {
@@ -114,7 +99,7 @@ namespace ManageData
             win.Add(addFilm, addActor, addReview, cancel);
             Application.Run(win);
         }
-        public void ProcessClickViewAll()
+        public static void ProcessClickViewAll()
         {
             Window win = new Window("Select entity")
             {
@@ -135,7 +120,7 @@ namespace ManageData
             win.Add(showFilms, showActors, showReviews, cancel);
             Application.Run(win);
         }
-        public void ClickCreateFilm()
+        public static void ClickCreateFilm()
         {
             CreateFilmDialog dialog = new CreateFilmDialog();
             dialog.SetRepository(repo.actorRepository);
@@ -152,7 +137,7 @@ namespace ManageData
                 }
             }
         }
-        public void ClickCreateActor()
+        public static void ClickCreateActor()
         {
             CreateActorDialog dialog = new CreateActorDialog();
             dialog.SetRepository(repo.filmRepository);
@@ -169,7 +154,7 @@ namespace ManageData
                 }
             }
         }
-        public void ClickCreateReview()
+        public static void ClickCreateReview()
         {
             CreateReviewDialog dialog = new CreateReviewDialog();
             dialog.SetService(repo);
@@ -180,25 +165,25 @@ namespace ManageData
                 repo.reviewRepository.Insert(review);
             }
         }
-        public void ClickShowAllFilms()
+        public static void ClickShowAllFilms()
         {
             ShowAllFilmsDialog dialog = new ShowAllFilmsDialog();
             dialog.SetRepository(repo);
             Application.Run(dialog);
         }
-        public void ClickShowAllActors()
+        public static void ClickShowAllActors()
         {
             ShowAllActorsDialog dialog = new ShowAllActorsDialog();
             dialog.SetRepository(repo);
             Application.Run(dialog);
         }
-        public void ClickShowAllReviews()
+        public static void ClickShowAllReviews()
         {
             ShowAllReviewsDialog dialog = new ShowAllReviewsDialog();
             dialog.SetRepository(repo);
             Application.Run(dialog);
         }
-        public void ProcessClickShow()
+        public static void ProcessClickShow()
         {
             Window win = new Window("Select entity")
             {
@@ -224,7 +209,7 @@ namespace ManageData
             win.Add(idLabel, idToShow, showFilms, showActors, showReviews, cancel);
             Application.Run(win);
         }
-        public void ClickShowFilm()
+        public static void ClickShowFilm()
         {
             string errorText = "";
             int id = 0;
@@ -294,7 +279,7 @@ namespace ManageData
                 }
             }
         }
-        public void ClickShowActor()
+        public static void ClickShowActor()
         {
             string errorText = "";
             int id = 0;
@@ -364,7 +349,7 @@ namespace ManageData
                 }
             }
         }
-        public void ClickShowReview()
+        public static void ClickShowReview()
         {
             string errorText = "";
             int id = 0;
@@ -401,7 +386,7 @@ namespace ManageData
                 }
             }
         }
-        private void ProcessClickEdit()
+        private static void ProcessClickEdit()
         {
             Window win = new Window("Select entity")
             {
@@ -427,7 +412,7 @@ namespace ManageData
             win.Add(idLabel, idToShow, editFilm, editActor, editReview, cancel);
             Application.Run(win);
         }
-        private void ClickEditFilm()
+        private static void ClickEditFilm()
         {
             string errorText = "";
             int id = 0;
@@ -492,7 +477,7 @@ namespace ManageData
                 }
             }
         }
-        private void ClickEditActor()
+        private static void ClickEditActor()
         {
             string errorText = "";
             int id = 0;
@@ -561,7 +546,7 @@ namespace ManageData
                 }
             }
         }
-        private void ClickEditReview()
+        private static void ClickEditReview()
         {
             string errorText = "";
             int id = 0;

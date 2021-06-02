@@ -7,6 +7,9 @@ namespace ManageData
     {
         private Service repo;
         private TextField idToShow;
+        private User currentUser;
+        private Label loggedUser;
+        private bool isModerator;
         public MainWindowUser()
         {
             this.Title = "e-base of films and actors";
@@ -27,6 +30,7 @@ namespace ManageData
             {
                 X = Pos.Center() - 20, Y = 9
             };
+            profile.Clicked += ClickShowProfile;
             Button viewFilms = new Button("View all films")
             {
                 X = Pos.Center() + 5, Y = 9
@@ -41,6 +45,7 @@ namespace ManageData
             {
                 X = Pos.Center() - 20, Y = 12
             };
+            createReview.Clicked += ClickCreateReview;
             this.Add(profile, viewFilms, viewActors, createReview);
             Label idLabel = new Label("ID:")
             {
@@ -61,9 +66,57 @@ namespace ManageData
             };
             showActors.Clicked += ClickFindActor;
             this.Add(idLabel, idToShow, showFilms, showActors);
-            // Button showReviews = new Button("Find review");
-            // showReviews.Clicked += ClickShowReview;
 
+            loggedUser = new Label(" ")
+            {
+                X = Pos.Percent(2), Y = Pos.Percent(2),
+                Width = Dim.Fill() - 20
+            };
+            
+            Button logOut = new Button("Log out")
+            {
+                X = Pos.Percent(85), Y = Pos.Y(loggedUser)
+            };
+            logOut.Clicked += OnLogOut;
+            this.Add(loggedUser, logOut);
+
+        }
+        public void SetUser(User user)
+        {
+            this.currentUser = user;
+            this.loggedUser.Text = $"Logged user: {user.username}";
+            if(user.isModerator == 0)
+            {
+                isModerator = false;
+            }
+            else
+            {
+                isModerator = true;
+            }
+        }
+        private void OnLogOut()
+        {
+            Application.Top.RemoveAll();
+            UserInterface.ProcessRegistration();
+        }
+        private void ClickCreateReview()
+        {
+            CreateReviewDialog dialog = new CreateReviewDialog();
+            dialog.SetService(repo);
+            Application.Run(dialog);
+            if(!dialog.canceled)
+            {
+                Review review = dialog.GetReview();
+                review.userId = currentUser.id;
+                repo.reviewRepository.Insert(review);
+            }
+        }
+        private void ClickShowProfile()
+        {
+            List<Review> userReviews = repo.reviewRepository.GetAllUserReviews(currentUser.id);
+            ShowProfileDialog dialog = new ShowProfileDialog();
+            dialog.SetUser(currentUser, userReviews);
+            Application.Run(dialog);
         }
         private void ClickFindFilm()
         {

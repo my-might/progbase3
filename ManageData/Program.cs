@@ -9,8 +9,8 @@ namespace ManageData
             string dataBaseFile = "/home/valeria/Desktop/progbase3/data/data.db";
             SqliteConnection connection = new SqliteConnection($"Data Source = {dataBaseFile}");
             Service repo = new Service(connection);
-            UserInterface userInterface = new UserInterface(repo);
-            userInterface.MainWindow();
+            UserInterface.SetService(repo);
+            UserInterface.ProcessApplication();
         }
     }
 }

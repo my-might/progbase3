@@ -7,7 +7,7 @@ namespace ClassLib
     public static class Authentication
     {
         private static UserRepository repo;
-        public static void SerRepository(UserRepository repo1)
+        public static void SetRepository(UserRepository repo1)
         {
             repo = repo1;
         }
@@ -21,6 +21,7 @@ namespace ClassLib
             SHA256 sha256Hash = SHA256.Create();
             string hash = GetHash(sha256Hash, user.password);
             user.password = hash;
+            user.isModerator = 0;
             user.registrationDate = DateTime.Now;
             repo.Insert(user);
         }

@@ -25,7 +25,7 @@ namespace Generator
                 4. Generate users
                 5. Exit");
                 string command = Console.ReadLine();
-                string generatorPath = "/home/valeria/Desktop/progbase3/data/generator/"; 
+                string generatorPath = "/home/valeria/Desktop/progbase3/data/generatorData/"; 
                 if(command == "1")
                 {
                     ProcessGenerateFilms(generatorPath, repo);

@@ -8,7 +8,7 @@ namespace ManageData
         private TextField idField;
         private TextField titleField;
         private TextField genreField;
-        private TextField descriptionField;
+        private TextView descriptionField;
         private TextField yearField;
         private ListView rolesView;
         private List<int> updatedRoles;
@@ -25,7 +25,7 @@ namespace ManageData
             Button ok = new Button("OK");
             ok.Clicked += DialogCanceled;
             this.AddButton(ok);
-            Label idLabel = new Label(2, 2, "ID:");
+            Label idLabel = new Label(2, 1, "ID:");
             idField = new TextField("")
             {
                 X = 20, Y = Pos.Top(idLabel), Width = Dim.Percent(50),
@@ -33,7 +33,7 @@ namespace ManageData
             };
             this.Add(idLabel, idField);
 
-            Label titleLabel = new Label(2, 4, "Title:");
+            Label titleLabel = new Label(2, 3, "Title:");
             titleField = new TextField("")
             {
                 X = 20, Y = Pos.Top(titleLabel), Width = Dim.Percent(50),
@@ -41,7 +41,7 @@ namespace ManageData
             };
             this.Add(titleLabel, titleField);
 
-            Label genreLabel = new Label(2, 6, "Genre:");
+            Label genreLabel = new Label(2, 5, "Genre:");
             genreField = new TextField("")
             {
                 X = 20, Y = Pos.Top(genreLabel), Width = Dim.Percent(50),
@@ -49,15 +49,15 @@ namespace ManageData
             };
             this.Add(genreLabel, genreField);
 
-            Label descriptionLabel = new Label(2, 8, "Description:");
-            descriptionField = new TextField()
+            Label descriptionLabel = new Label(2, 7, "Description:");
+            descriptionField = new TextView()
             {
                 X = 20, Y = Pos.Top(descriptionLabel), Width = Dim.Percent(50),
-                ReadOnly = true
+                Height = 3, ReadOnly = true
             };
             this.Add(descriptionLabel, descriptionField);
 
-            Label yearLabel = new Label(2, 10, "Release year:");
+            Label yearLabel = new Label(2, 11, "Release year:");
             yearField = new TextField("")
             {
                 X = 20, Y = Pos.Top(yearLabel), Width = Dim.Percent(50),
@@ -65,7 +65,7 @@ namespace ManageData
             };
             this.Add(yearLabel, yearField);
 
-            Label rolesLabel = new Label(2, 12, "Starring actors:");
+            Label rolesLabel = new Label(2, 13, "Starring actors:");
             rolesView = new ListView(new List<Actor>())
             {
                 Width = Dim.Fill(),
@@ -75,19 +75,19 @@ namespace ManageData
             {
                 X = 20, Y = Pos.Top(rolesLabel),
                 Width = Dim.Percent(50),
-                Height = 5
+                Height = 4
             };
             frameView.Add(rolesView);
             this.Add(rolesLabel, frameView);
 
-            Button delete = new Button(2, 13, "Delete");
+            Button delete = new Button(2, 14, "Delete");
             delete.Clicked += OnDeleteFilm;
             Button edit = new Button("Edit")
             {
                 X = delete.X, Y = 15
             };
             edit.Clicked += OnEditFilm;
-            Button showReviews = new Button(2, 14, "Show reviews");
+            Button showReviews = new Button(2, 15, "Show reviews");
             showReviews.Clicked += OnShowReviews;
             this.Add(delete, edit, showReviews);
             delete.Visible = (user = false);

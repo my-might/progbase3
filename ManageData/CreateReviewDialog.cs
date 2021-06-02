@@ -6,7 +6,7 @@ namespace ManageData
     public class CreateReviewDialog : Dialog
     {
         public bool canceled;
-        protected TextField inputOpinion;
+        protected TextView inputOpinion;
         protected TextField inputRating;
         protected TextField inputFilmId;
         private Service repo;
@@ -21,20 +21,21 @@ namespace ManageData
             this.AddButton(cancel);
 
             Label reviewOpinion = new Label(2, 2, "Opinion:");
-            inputOpinion = new TextField("")
+            inputOpinion = new TextView()
             {
-                X = 20, Y = Pos.Top(reviewOpinion), Width = Dim.Percent(50)
+                X = 20, Y = Pos.Top(reviewOpinion), Width = Dim.Percent(50),
+                Height = 3
             };
             this.Add(reviewOpinion, inputOpinion);
 
-            Label reviewRating = new Label(2, 4, "Rating:");
+            Label reviewRating = new Label(2, 6, "Rating:");
             inputRating = new TextField("")
             {
                 X = 20, Y = Pos.Top(reviewRating), Width = Dim.Percent(50)
             };
             this.Add(reviewRating, inputRating);
 
-            Label reviewFilmId = new Label(2, 6, "Film id:");
+            Label reviewFilmId = new Label(2, 8, "Film id:");
             inputFilmId = new TextField("")
             {
                 X = 20, Y = Pos.Top(reviewFilmId), Width = Dim.Percent(50)

@@ -10,7 +10,7 @@ namespace ManageData
         protected ActorRepository repo;
         protected TextField inputTitle;
         protected TextField inputGenre;
-        protected TextField inputDescription;
+        protected TextView inputDescription;
         protected TextField inputRelease;
         protected TextField inputRoles;
         private List<int> actorIds;
@@ -39,21 +39,21 @@ namespace ManageData
             this.Add(filmGenre, inputGenre);
 
             Label filmDescription = new Label(2, 6, "Description:");
-            inputDescription = new TextField("")
+            inputDescription = new TextView()
             {
                 X = 20, Y = Pos.Top(filmDescription), 
-                Width = Dim.Percent(50)
+                Width = Dim.Percent(50), Height = 3
             };
             this.Add(filmDescription, inputDescription);
 
-            Label filmRelease = new Label(2, 8, "Release year:");
+            Label filmRelease = new Label(2, 10, "Release year:");
             inputRelease = new TextField("")
             {
                 X = 20, Y = Pos.Top(filmRelease), Width = Dim.Percent(50)
             };
             this.Add(filmRelease, inputRelease);
 
-            Label filmRoles = new Label(2, 10, "Starring actors:");
+            Label filmRoles = new Label(2, 12, "Starring actors:");
             inputRoles = new TextField("")
             {
                 X = 20, Y = Pos.Top(filmRoles), Width = Dim.Percent(50)

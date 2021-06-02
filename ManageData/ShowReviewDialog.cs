@@ -5,7 +5,7 @@ namespace ManageData
     public class ShowReviewDialog : Dialog
     {
         private TextField idField;
-        private TextField opinionField;
+        private TextView opinionField;
         private TextField ratingField;
         private DateField postedAtDateField;
         private TimeField postedAtTimeField;
@@ -29,14 +29,14 @@ namespace ManageData
             this.Add(idLabel, idField);
 
             Label opinionLabel = new Label(2, 4, "Opinion:");
-            opinionField = new TextField("")
+            opinionField = new TextView()
             {
                 X = 20, Y = Pos.Top(opinionLabel), Width = Dim.Percent(50),
-                ReadOnly = true
+                Height = 3, ReadOnly = true
             };
             this.Add(opinionLabel, opinionField);
 
-            Label ratingLable = new Label(2, 6, "Rating:");
+            Label ratingLable = new Label(2, 8, "Rating:");
             ratingField = new TextField("")
             {
                 X = 20, Y = Pos.Top(ratingLable), Width = Dim.Percent(50),
@@ -44,7 +44,7 @@ namespace ManageData
             };
             this.Add(ratingLable, ratingField);
 
-            Label postedAtLable = new Label(2, 8, "Posted at:");
+            Label postedAtLable = new Label(2, 10, "Posted at:");
             postedAtDateField = new DateField()
             {
                 X = 20, Y = Pos.Top(postedAtLable), Width = Dim.Percent(30),
@@ -57,18 +57,18 @@ namespace ManageData
             };
             this.Add(postedAtLable, postedAtDateField, postedAtTimeField);
 
-            Label filmIdLabel = new Label(2, 10, "Film id:");
+            Label filmIdLabel = new Label(2, 12, "Film id:");
             filmIdField = new TextField("")
             {
                 X = 20, Y = Pos.Top(filmIdLabel), Width = Dim.Percent(50),
                 ReadOnly = true
             };
             this.Add(filmIdLabel, filmIdField);
-            Button delete = new Button(2, 12, "Delete");
+            Button delete = new Button(2, 14, "Delete");
             delete.Clicked += OnDeleteReview;
             Button edit = new Button("Edit")
             {
-                X = delete.X, Y = 13
+                X = delete.X, Y = 15
             };
             edit.Clicked += OnEditReview;
             this.Add(delete, edit);
