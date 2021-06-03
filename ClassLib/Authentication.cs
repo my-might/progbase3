@@ -11,7 +11,7 @@ namespace ClassLib
         {
             repo = repo1;
         }
-        public static void Registration(User user)
+        public static int Registration(User user)
         {
             User exist = repo.GetByUsername(user.username);
             if(exist != null)
@@ -23,7 +23,8 @@ namespace ClassLib
             user.password = hash;
             user.isModerator = 0;
             user.registrationDate = DateTime.Now;
-            repo.Insert(user);
+            int userId = (int)repo.Insert(user);
+            return userId;
         }
         public static User Login(string username, string password)
         {

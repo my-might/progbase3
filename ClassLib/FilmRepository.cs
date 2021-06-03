@@ -116,6 +116,37 @@ namespace ClassLib
             const int pageSize = 10;
             return (int)Math.Ceiling(GetCount() / (double)pageSize);
         }
+        public int GetSearchPagesCount(string searchTitle)
+        {
+            const int pageSize = 10;
+            connection.Open();
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM films WHERE title LIKE '%' || $value || '%'";
+            command.Parameters.AddWithValue("$value", searchTitle);
+            long result = (long)command.ExecuteScalar();
+            connection.Close();
+            return (int)Math.Ceiling((int)result / (double)pageSize);
+        }
+        public List<Film> GetSearchPage(string searchTitle, int page)
+        {
+            const int pageSize = 10;
+            connection.Open();
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM films WHERE title LIKE '%' || $value || '%' LIMIT $pageSize OFFSET $offset";
+            command.Parameters.AddWithValue("$pageSize",pageSize);
+            command.Parameters.AddWithValue("offset",pageSize*(page-1));
+            command.Parameters.AddWithValue("$value", searchTitle);
+            List<Film> films = new List<Film>();
+            SqliteDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Film film = GetFilm(reader);
+                films.Add(film);
+            }
+            reader.Close();
+            connection.Close();
+            return films;
+        }
         public List<Film> GetPage(int p)
         {
             connection.Open();

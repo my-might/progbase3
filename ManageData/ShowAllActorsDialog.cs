@@ -10,6 +10,8 @@ namespace ManageData
         private Label totalPagesLabel;
         private Label currentPageLabel;
         private TextField searchPage;
+        private TextField searchFullname;
+        private string searchValue = "";
         private ListView allActors;
         private User user;
         public ShowAllActorsDialog()
@@ -54,13 +56,33 @@ namespace ManageData
                 Height = 12
             };
             frameView.Add(allActors);
-            searchPage = new TextField("")
+            // searchPage = new TextField("")
+            // {
+            //     X = Pos.Center(), Y = 2,
+            //     Width = Dim.Percent(10)
+            // };
+            // searchPage.TextChanged += OnSearchPageEnter;
+
+            Label fullnameLabel = new Label("Search by fullname:")
             {
-                X = Pos.Center(), Y = 2,
-                Width = Dim.Percent(10)
+                X = 5, Y = Pos.Bottom(frameView)
             };
-            searchPage.KeyPress += OnSearchEnter;
-            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, frameView, searchPage);
+            searchFullname = new TextField("")
+            {
+                X = Pos.Right(fullnameLabel) + 1, Y = Pos.Y(fullnameLabel), Width = Dim.Percent(50)
+            };
+            searchFullname.KeyPress += OnSearchFullnameEnter;
+            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, 
+                    frameView, fullnameLabel, searchFullname);
+        }
+        private void OnSearchFullnameEnter(KeyEventEventArgs args)
+        {
+            if(args.KeyEvent.Key == Key.Enter)
+            {
+                page = 1;
+                this.searchValue = this.searchFullname.Text.ToString();
+                ShowCurrentPage();
+            }
         }
         private void OnOpenActor(ListViewItemEventArgs args)
         {
@@ -74,8 +96,15 @@ namespace ManageData
                 return;
             }
             List<Film> roles = repo.roleRepository.GetAllFilms(actor.id);
-            actor.films = new Film[roles.Count];
-            roles.CopyTo(actor.films);
+            if(roles.Count != 0)
+            {
+                actor.films = new Film[roles.Count];
+                roles.CopyTo(actor.films);
+            }
+            else
+            {
+                actor.films = null;
+            }
             ShowActorDialog dialog = new ShowActorDialog();
             dialog.SetActor(actor);
             dialog.SetRepository(repo.filmRepository);
@@ -124,14 +153,10 @@ namespace ManageData
             }
             ShowCurrentPage();
         }
-        private void OnSearchEnter(KeyEventEventArgs args)
+        private void OnSearchPageEnter(NStack.ustring args)
         {
             string errorText = "";
             int toPage = 0;
-            if(args.KeyEvent.Key != Key.Enter)
-            {
-                return;
-            }
             if(searchPage.Text.ToString() == "")
             {
                 errorText = "Field is empty.";
@@ -184,7 +209,15 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            int totalPages = repo.actorRepository.GetTotalPages();
+            int totalPages = repo.actorRepository.GetSearchPagesCount(searchValue);
+            if(page > totalPages && page > 1)
+            {
+                page = totalPages;
+            }
+            if(totalPages != 0 && page == 0)
+            {
+                page = 1;
+            }
             if(totalPages == 0)
             {
                 this.page = 0;
@@ -198,7 +231,7 @@ namespace ManageData
             {
                 this.currentPageLabel.Text = this.page.ToString();
                 this.totalPagesLabel.Text = totalPages.ToString();
-                this.allActors.SetSource(repo.actorRepository.GetPage(page));
+                this.allActors.SetSource(repo.actorRepository.GetSearchPage(searchValue, page));
             }
         }
         private void DialogCanceled()

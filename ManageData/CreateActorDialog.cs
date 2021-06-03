@@ -60,6 +60,10 @@ namespace ManageData
         }
         public List<int> GetFilmIds()
         {
+            if(filmIds == null)
+            {
+                filmIds = new List<int>();
+            }
             return this.filmIds;
         }
         public void SetRepository(FilmRepository repo)
@@ -128,7 +132,6 @@ namespace ManageData
             else
             {
                 this.canceled = false;
-                MessageBox.Query("Write review", "Actor was created!", "OK");
                 Application.RequestStop();
             }
         }

@@ -36,14 +36,22 @@ namespace ClassLib
             connection.Close();
             return result;
         }
+        public void DeleteByFilmId(int filmId)
+        {
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"DELETE FROM reviews WHERE filmId = $filmId";
+            command.Parameters.AddWithValue("$filmId", filmId);
+            long result = command.ExecuteNonQuery();
+            connection.Close();
+        }
         public long Update(long id, Review review)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"UPDATE reviews SET opinion = $opinion, rating = $rating, filmId = $filmId WHERE id = $id";
+            command.CommandText = @"UPDATE reviews SET opinion = $opinion, rating = $rating WHERE id = $id";
             command.Parameters.AddWithValue("$opinion", review.opinion);
             command.Parameters.AddWithValue("$rating", review.rating);
-            command.Parameters.AddWithValue("$filmId", review.filmId);
             command.Parameters.AddWithValue("$id", id);
             long result = command.ExecuteNonQuery();
             connection.Close();
@@ -151,6 +159,17 @@ namespace ClassLib
             reader.Close();
             connection.Close();
             return reviews;
+        }
+        public double GetAverageFilmRating(int filmId)
+        {
+            List<Review> reviews = GetAllFilmReviews(filmId);
+            int sum = 0;
+            foreach(Review review in reviews)
+            {
+                sum += review.rating;
+            }
+            double result = Math.Round((double)sum/reviews.Count, 2);
+            return (double)sum/reviews.Count;
         }
         private static Review GetReview(SqliteDataReader reader)
         {

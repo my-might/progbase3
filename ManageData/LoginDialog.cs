@@ -66,6 +66,7 @@ namespace ManageData
             }
             else
             {
+                loggedUser = new User();
                 try
                 {
                     Authentication.SetRepository(repo);

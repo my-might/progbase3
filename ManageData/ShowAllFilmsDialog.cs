@@ -10,6 +10,8 @@ namespace ManageData
         private Label totalPagesLabel;
         private Label currentPageLabel;
         private TextField searchPage;
+        private TextField searchTitle;
+        private string searchValue = "";
         private ListView allFilms;
         private User currentUser;
         public ShowAllFilmsDialog()
@@ -54,13 +56,34 @@ namespace ManageData
                 Height = 12
             };
             frameView.Add(allFilms);
-            searchPage = new TextField("")
+            // searchPage = new TextField("")
+            // {
+            //     X = Pos.Center(), Y = 2,
+            //     Width = Dim.Percent(10)
+            // };
+            // searchPage.KeyPress += OnSearchPageAlt;
+
+            Label titleLabel = new Label("Search by title:")
             {
-                X = Pos.Center(), Y = 2,
-                Width = Dim.Percent(10)
+                X = 5, Y = Pos.Bottom(frameView)
             };
-            searchPage.KeyPress += OnSearchEnter;
-            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, frameView, searchPage);
+            searchTitle = new TextField("")
+            {
+                X = Pos.Right(titleLabel) + 1, Y = Pos.Y(titleLabel), Width = Dim.Percent(50)
+            };
+            searchTitle.KeyPress += OnSearchTitleEnter;
+
+            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, 
+                    frameView, titleLabel, searchTitle);
+        }
+        private void OnSearchTitleEnter(KeyEventEventArgs args)
+        {
+            if(args.KeyEvent.Key == Key.Enter)
+            {
+                page = 1;
+                this.searchValue = this.searchTitle.Text.ToString();
+                ShowCurrentPage();
+            }
         }
         private void OnOpenFilm(ListViewItemEventArgs args)
         {
@@ -74,8 +97,15 @@ namespace ManageData
                 return;
             }
             List<Actor> roles = repo.roleRepository.GetAllActors(film.id);
-            film.actors = new Actor[roles.Count];
-            roles.CopyTo(film.actors);
+            if(roles.Count != 0)
+            {
+                film.actors = new Actor[roles.Count];
+                roles.CopyTo(film.actors);
+            }
+            else
+            {
+                film.actors = null;
+            }
             ShowFilmDialog dialog = new ShowFilmDialog();
             dialog.SetService(repo);
             dialog.SetFilm(film);
@@ -85,6 +115,7 @@ namespace ManageData
             {
                 repo.filmRepository.DeleteById(film.id);
                 repo.roleRepository.DeleteByFilmId(film.id);
+                repo.reviewRepository.DeleteByFilmId(film.id);
             }
             if(page > repo.filmRepository.GetTotalPages() && page > 1)
             {
@@ -124,11 +155,11 @@ namespace ManageData
             }
             ShowCurrentPage();
         }
-        private void OnSearchEnter(KeyEventEventArgs args)
+        private void OnSearchPageAlt(KeyEventEventArgs args)
         {
             string errorText = "";
             int toPage = 0;
-            if(args.KeyEvent.Key != Key.Enter)
+            if(args.KeyEvent.Key != Key.AltMask)
             {
                 return;
             }
@@ -184,7 +215,15 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            int totalPages = repo.filmRepository.GetTotalPages();
+            int totalPages = repo.filmRepository.GetSearchPagesCount(searchTitle.Text.ToString());
+            if(page > totalPages && page > 1)
+            {
+                page = totalPages;
+            }
+            if(totalPages != 0 && page == 0)
+            {
+                page = 1;
+            }
             if(totalPages == 0)
             {
                 this.page = 0;
@@ -198,7 +237,7 @@ namespace ManageData
             {
                 this.currentPageLabel.Text = this.page.ToString();
                 this.totalPagesLabel.Text = totalPages.ToString();
-                this.allFilms.SetSource(repo.filmRepository.GetPage(page));
+                this.allFilms.SetSource(repo.filmRepository.GetSearchPage(searchTitle.Text.ToString(), page));
             }
         }
         private void DialogCanceled()

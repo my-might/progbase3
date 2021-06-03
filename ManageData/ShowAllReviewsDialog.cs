@@ -11,6 +11,7 @@ namespace ManageData
         private Label currentPageLabel;
         private TextField searchPage;
         private ListView allReviews;
+        private User user;
         public ShowAllReviewsDialog()
         {
             Button ok = new Button("OK");
@@ -75,6 +76,7 @@ namespace ManageData
             ShowReviewDialog dialog = new ShowReviewDialog();
             dialog.SetService(repo);
             dialog.SetReview(review);
+            dialog.SetUser(user);
             Application.Run(dialog);
             if(dialog.deleted)
             {
@@ -124,6 +126,10 @@ namespace ManageData
         {
             this.repo = repo;
             ShowCurrentPage();
+        }
+        public void SetUser(User user)
+        {
+            this.user = user;
         }
         private void ClickPrevPage()
         {

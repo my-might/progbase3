@@ -184,6 +184,51 @@ namespace ClassLib
             }
             return films;
         }
+        public double[][] ValuesForImage(List<Film> films)
+        {
+            double[][] result = new double[films.Count][];
+            for(int i = 0; i<films.Count; i++)
+            {
+                result[i] = new double[4];
+                if(films[i].reviews.Count != 0)
+                {
+                    result[i][0] = films[i].reviews[0].rating;
+                    result[i][3] = films[i].reviews[films[i].reviews.Count-1].rating;
+                    double min = films[i].reviews[0].rating;
+                    double max = films[i].reviews[0].rating;
+                    foreach(Review review in films[i].reviews)
+                    {
+                        if(review.rating > max)
+                        {
+                            max = review.rating;
+                        }
+                        else if(review.rating < min)
+                        {
+                            min = review.rating;
+                        }
+                    }
+                    result[i][1] = max;
+                    result[i][2] = min;
+                }
+                else
+                {
+                    result[i][0] = 0;
+                    result[i][1] = 0;
+                    result[i][2] = 0;
+                    result[i][3] = 0;
+                }
+            }
+            return result;
+        }
+        public string[] TitlesForImage(List<Film> films)
+        {
+            string[] result = new string[films.Count];
+            for(int i = 0; i<films.Count; i++)
+            {
+                result[i] = films[i].id.ToString();
+            }
+            return result;
+        }
         private static Role GetRole(SqliteDataReader reader)
         {
             Role role = new Role();

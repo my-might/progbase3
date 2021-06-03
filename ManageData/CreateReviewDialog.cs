@@ -97,7 +97,6 @@ namespace ManageData
             else
             {
                 this.canceled = false;
-                MessageBox.Query("Write review", "Review was created!", "OK");
                 Application.RequestStop();
             }
         }

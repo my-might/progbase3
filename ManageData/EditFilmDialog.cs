@@ -14,7 +14,7 @@ namespace ManageData
             this.inputDescription.Text = film.description;
             this.inputRelease.Text = film.releaseYear.ToString();
             string ids = "";
-            if(film.actors.Length != 0)
+            if(film.actors != null)
             {
                 for(int i = 0; i<film.actors.Length; i++)
                 {

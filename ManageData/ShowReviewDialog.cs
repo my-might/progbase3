@@ -101,7 +101,6 @@ namespace ManageData
             dialog.SetReview(this.reviewToShow);
             dialog.SetService(repo);
             Application.Run(dialog);
-
             if(!dialog.canceled)
             {
                 MessageBox.Query("Edit", "Review was updated!", "OK");

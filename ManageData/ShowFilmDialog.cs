@@ -11,6 +11,7 @@ namespace ManageData
         private TextView descriptionField;
         private TextField yearField;
         private ListView rolesView;
+        private TextField ratingField;
         private List<int> updatedRoles;
         public bool deleted;
         public bool updated;
@@ -71,25 +72,34 @@ namespace ManageData
                 Width = Dim.Fill(),
                 Height = Dim.Fill()
             };
+
+            Label ratingLabel = new Label(2, 17, "Average rating:");
+            ratingField = new TextField("")
+            {
+                X = 20, Y = Pos.Top(ratingLabel), Width = Dim.Percent(50),
+                ReadOnly = true
+            };
+            this.Add(ratingLabel, ratingField);
+
             FrameView frameView = new FrameView("")
             {
                 X = 20, Y = Pos.Top(rolesLabel),
                 Width = Dim.Percent(50),
-                Height = 4
+                Height = 3
             };
             frameView.Add(rolesView);
             this.Add(rolesLabel, frameView);
 
-            delete = new Button(2, 14, "Delete");
+            delete = new Button(2, 19, "Delete");
             delete.Clicked += OnDeleteFilm;
             edit = new Button("Edit")
             {
-                X = delete.X, Y = 15
+                X = delete.X, Y = 20
             };
             edit.Clicked += OnEditFilm;
-            Button showReviews = new Button(2, 16, "Show reviews");
+            Button showReviews = new Button(2, 21, "Show reviews");
             showReviews.Clicked += OnShowReviews;
-            Button createReview = new Button(2, 17, "Write review");
+            Button createReview = new Button(2, 22, "Write review");
             createReview.Clicked += OnWriteReview;
             this.Add(delete, edit, showReviews, createReview);
         }
@@ -131,11 +141,12 @@ namespace ManageData
             if(!dialog.canceled)
             {
                 MessageBox.Query("Edit", "Film was updated!", "OK");
-                Film updated = dialog.GetFilm();
-                updated.id = filmToShow.id;
+                Film updatedFilm = dialog.GetFilm();
+                updatedFilm.id = filmToShow.id;
                 this.updatedRoles = dialog.GetActorIds();
+                updatedFilm.actors = ListToArray(ListIntToActor(updatedRoles));
                 this.updated = true;
-                SetFilm(updated);
+                SetFilm(updatedFilm);
             }
         }
         public Film GetFilm()
@@ -150,11 +161,7 @@ namespace ManageData
             this.genreField.Text = film.genre;
             this.descriptionField.Text = film.description;
             this.yearField.Text = film.releaseYear.ToString();
-            if(updatedRoles != null && updatedRoles.Count != 0)
-            {
-                this.rolesView.SetSource(ListIntToActor());
-            }
-            else if(film.actors.Length != 0)
+            if(film.actors != null)
             {
                 List<Actor> actors = ArrayToList(film.actors);
                 this.rolesView.SetSource(actors);
@@ -165,15 +172,37 @@ namespace ManageData
                 emptyText.Add("There are no actors.");
                 this.rolesView.SetSource(emptyText);
             }
+            double rating = repo.reviewRepository.GetAverageFilmRating(film.id);
+            if(repo.reviewRepository.GetAllFilmReviews(film.id).Count != 0)
+            {
+                this.ratingField.Text = repo.reviewRepository.GetAverageFilmRating(film.id).ToString();
+            }
+            else
+            {
+                this.ratingField.Text = "no reviews";
+            }
         }
-        private List<Actor> ListIntToActor()
+        private List<Actor> ListIntToActor(List<int> input)
         {
             List<Actor> actors = new List<Actor>();
-            foreach(int id in updatedRoles)
+            foreach(int id in input)
             {
                 actors.Add(repo.actorRepository.GetById(id));
             }
             return actors;
+        }
+        private Actor[] ListToArray(List<Actor> actors)
+        {
+            Actor[] result = null;
+            if(actors.Count != 0)
+            {
+                result = new Actor[actors.Count];
+                for(int i = 0; i<actors.Count; i++)
+                {
+                    result[i] = actors[i];
+                }
+            }
+            return result;
         }
         public void SetService(Service repo)
         {

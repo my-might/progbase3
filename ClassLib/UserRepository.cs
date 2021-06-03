@@ -40,11 +40,10 @@ namespace ClassLib
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"UPDATE users SET username = $username, fullname = $fullname, password = $password, 
+            command.CommandText = @"UPDATE users SET username = $username, fullname = $fullname,
                                     isModerator = $isModerator WHERE id = $id";
             command.Parameters.AddWithValue("$username", user.username);
             command.Parameters.AddWithValue("$fullname", user.fullname);
-            command.Parameters.AddWithValue("$password", user.password);
             command.Parameters.AddWithValue("$isModerator", user.isModerator);
             command.Parameters.AddWithValue("$id", id);
             long result = command.ExecuteNonQuery();

@@ -25,7 +25,7 @@ namespace ClassLib
         }
         public override string ToString()
         {
-            return string.Format($"[{this.id}] {this.opinion}, {this.rating}, {this.postedAt.ToString()} to film {this.filmId}");
+            return string.Format($"[{this.id}] {this.opinion}, {this.rating}");
         }
     }
 }

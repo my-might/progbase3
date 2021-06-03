@@ -148,7 +148,7 @@ namespace ManageData
                 try
                 {
                     Authentication.SetRepository(repo);
-                    Authentication.Registration(user);
+                    user.id = Authentication.Registration(user);
                     MessageBox.Query("Registration", "You have registered successfully!", "OK");
                     this.canceled = false;
                     Application.RequestStop();

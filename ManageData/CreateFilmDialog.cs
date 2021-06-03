@@ -141,7 +141,6 @@ namespace ManageData
             else
             {
                 this.canceled = false;
-                MessageBox.Query("Write review", "Film was created!", "OK");
                 Application.RequestStop();
             }
         }

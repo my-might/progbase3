@@ -99,11 +99,12 @@ namespace ManageData
             if(!dialog.canceled)
             {
                 MessageBox.Query("Edit", "Actor was updated!", "OK");
-                Actor updated = dialog.GetActor();
-                updated.id = actorToshow.id;
+                Actor updatedActor = dialog.GetActor();
+                updatedActor.id = actorToshow.id;
                 this.updatedRoles = dialog.GetFilmIds();
+                updatedActor.films = ListToArray(ListIntToFilm(updatedRoles));
                 this.updated = true;
-                SetActor(updated);
+                SetActor(updatedActor);
             }
         }
         public Actor GetActor()
@@ -119,11 +120,7 @@ namespace ManageData
             this.birthdateField.ReadOnly = false;
             this.birthdateField.Date = actor.birthDate;
             this.birthdateField.ReadOnly = true;
-            if(updatedRoles != null && updatedRoles.Count != 0)
-            {
-                this.rolesView.SetSource(ListIntToFilm());
-            }
-            else if(actor.films.Length != 0)
+            if(actor.films != null)
             {
                 List<Film> films = ArrayToList(actor.films);
                 this.rolesView.SetSource(films);
@@ -148,10 +145,23 @@ namespace ManageData
                 edit.Visible = false;
             }
         }
-        private List<Film> ListIntToFilm()
+        private Film[] ListToArray(List<Film> films)
+        {
+            Film[] result = null;
+            if(films.Count != 0)
+            {
+                result = new Film[films.Count];
+                for(int i = 0; i<films.Count; i++)
+                {
+                    result[i] = films[i];
+                }
+            }
+            return result;
+        }
+        private List<Film> ListIntToFilm(List<int> input)
         {
             List<Film> films = new List<Film>();
-            foreach(int id in updatedRoles)
+            foreach(int id in input)
             {
                 films.Add(repo.GetById(id));
             }

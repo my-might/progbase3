@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using System.IO;
 using ClassLib;
+using System.Collections.Generic;
 namespace Generator
 {
     public class Range<T>
@@ -13,7 +14,12 @@ namespace Generator
     {
         static void Main(string[] args)
         {
-            string dataBaseFile = "/home/valeria/Desktop/progbase3/data/data.db";
+            string dataBaseFile = "./../data/data.db";
+            if(!File.Exists(dataBaseFile))
+            {
+                Console.WriteLine("Database file doesn`t exist.");
+                Environment.Exit(1);
+            }
             SqliteConnection connection = new SqliteConnection($"Data Source = {dataBaseFile}");
             Service repo = new Service(connection);
             while(true)
@@ -25,7 +31,7 @@ namespace Generator
                 4. Generate users
                 5. Exit");
                 string command = Console.ReadLine();
-                string generatorPath = "/home/valeria/Desktop/progbase3/data/generatorData/"; 
+                string generatorPath = "./../data/generatorData/"; 
                 if(command == "1")
                 {
                     ProcessGenerateFilms(generatorPath, repo);

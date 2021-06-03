@@ -40,7 +40,7 @@ namespace ManageData
                         new MenuItem ("_Exit", "", OnQuit)
                     }),
                     new MenuBarItem ("_Help", new MenuItem [] {
-                        new MenuItem ("Help!", "", null)
+                        new MenuItem ("_About!", "", Help)
                     })
                 });
                 MainWindowUser userWin = new MainWindowUser();
@@ -49,6 +49,11 @@ namespace ManageData
                 top.Add(userWin, menu);
                 Application.Run();
             }
+        }
+        public static void Help()
+        {
+            HelpDialog dialog = new HelpDialog();
+            Application.Run(dialog);
         }
         public static void Export()
         {

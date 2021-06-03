@@ -13,7 +13,7 @@ namespace ManageData
             this.inputCountry.Text = actor.country;
             this.inputBirthDate.Date = actor.birthDate; 
             string ids = "";
-            if(actor.films.Length != 0)
+            if(actor.films != null)
             {
                 for(int i = 0; i<actor.films.Length; i++)
                 {

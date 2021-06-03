@@ -116,6 +116,37 @@ namespace ClassLib
             connection.Close();
             return actors;
         }
+        public int GetSearchPagesCount(string searchFullname)
+        {
+            const int pageSize = 10;
+            connection.Open();
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM actors WHERE fullname LIKE '%' || $value || '%'";
+            command.Parameters.AddWithValue("$value", searchFullname);
+            long result = (long)command.ExecuteScalar();
+            connection.Close();
+            return (int)Math.Ceiling((int)result / (double)pageSize);
+        }
+        public List<Actor> GetSearchPage(string searchFullname, int page)
+        {
+            const int pageSize = 10;
+            connection.Open();
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM actors WHERE fullname LIKE '%' || $value || '%' LIMIT $pageSize OFFSET $offset";
+            command.Parameters.AddWithValue("$pageSize",pageSize);
+            command.Parameters.AddWithValue("offset",pageSize*(page-1));
+            command.Parameters.AddWithValue("$value", searchFullname);
+            List<Actor> actors = new List<Actor>();
+            SqliteDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Actor actor = GetActor(reader);
+                actors.Add(actor);
+            }
+            reader.Close();
+            connection.Close();
+            return actors;
+        }
         public int[] GetAllIds()
         {
             connection.Open();
