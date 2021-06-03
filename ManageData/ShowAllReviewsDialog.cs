@@ -97,7 +97,7 @@ namespace ManageData
             {
                 repo.reviewRepository.DeleteById(review.id);
             }
-            if(page > repo.reviewRepository.GetTotalPages() && page > 1)
+            if(page > repo.reviewRepository.GetSearchPagesCount(searchValue) && page > 1)
             {
                 page--;
             }
@@ -127,7 +127,7 @@ namespace ManageData
         }
         private void ClickNextPage()
         {
-            int totalPages = repo.reviewRepository.GetTotalPages();
+            int totalPages = repo.reviewRepository.GetSearchPagesCount(searchValue);
             if(page == totalPages)
             {
                 return;

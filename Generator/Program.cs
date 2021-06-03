@@ -2,6 +2,8 @@
 using Microsoft.Data.Sqlite;
 using System.IO;
 using ClassLib;
+using System.Security.Cryptography;
+using System.Text;
 using System.Collections.Generic;
 namespace Generator
 {
@@ -78,7 +80,7 @@ namespace Generator
         static void ProcessGenerateFilms(string generatorPath, Service repo)
         {
             int number = GetNumberOfEntities();
-            int[] actorIds = repo.actorRepository.GetAllIds();
+            int[] actorIds = GetAllActorIds(repo);
             Range<int> rangeOfFilms = new Range<int>();
             bool actorRelation = false;
             if(actorIds.Length == 0)
@@ -96,7 +98,7 @@ namespace Generator
                     {
                         Console.WriteLine("Process generating actors:");
                         rangeOfFilms = GenerateActorsForFilms(generatorPath, repo, number);
-                        actorIds = repo.actorRepository.GetAllIds();
+                        actorIds = GetAllActorIds(repo);
                         actorRelation = true;
                         break;
                     }
@@ -130,10 +132,46 @@ namespace Generator
             }
             Console.WriteLine("Done!");
         }
+        static int[] GetAllActorIds(Service repo)
+        {
+            List<Actor> actors = repo.actorRepository.GetAll();
+            List<int> ids = new List<int>();
+            foreach(Actor actor in actors)
+            {
+                ids.Add(actor.id);
+            }
+            int[] result = new int[ids.Count];
+            ids.CopyTo(result);
+            return result;
+        }
+        static int[] GetAllFilmIds(Service repo)
+        {
+            List<Film> films = repo.filmRepository.GetAll();
+            List<int> ids = new List<int>();
+            foreach(Film film in films)
+            {
+                ids.Add(film.id);
+            }
+            int[] result = new int[ids.Count];
+            ids.CopyTo(result);
+            return result;
+        }
+        static int[] GetAllUserIds(Service repo)
+        {
+            List<User> users = repo.userRepository.GetAll();
+            List<int> ids = new List<int>();
+            foreach(User user in users)
+            {
+                ids.Add(user.id);
+            }
+            int[] result = new int[ids.Count];
+            ids.CopyTo(result);
+            return result;
+        }
         static void ProcessGenerateActors(string generatorPath, Service repo)
         {
             int number = GetNumberOfEntities();
-            int[] filmIds = repo.filmRepository.GetAllIds();
+            int[] filmIds = GetAllFilmIds(repo);
             Range<int> rangeOfActors = new Range<int>();
             bool filmRelation = false;
             if(filmIds.Length == 0)
@@ -151,7 +189,7 @@ namespace Generator
                     {
                         Console.WriteLine("Process generating films:");
                         rangeOfActors = GenerateFilmsForActors(generatorPath, repo, number);
-                        filmIds = repo.filmRepository.GetAllIds();
+                        filmIds = GetAllFilmIds(repo);
                         filmRelation = true;
                         break;
                     }
@@ -391,13 +429,13 @@ namespace Generator
         }
         static void ProcessGenerateReviews(string generatorPath, Service repo)
         {
-            int[] filmIds = repo.filmRepository.GetAllIds();
+            int[] filmIds = GetAllFilmIds(repo);
             if(filmIds.Length == 0)
             {
                 Console.Error.WriteLine("Error: Cannot generate reviews, when database doesn`t contain any films.");
                 return;
             }
-            int[] userIds = repo.userRepository.GetAllIds();
+            int[] userIds = GetAllUserIds(repo);
             if(userIds.Length == 0)
             {
                 Console.Error.WriteLine("Error: Cannot generate reviews, when database doesn`t contain any users.");
@@ -529,14 +567,32 @@ namespace Generator
             {
                 User user = new User();
                 user.username = GenerateFromFile(generatorPath + "usernames.txt");
+                if(repo.userRepository.GetByUsername(user.username) != null)
+                {
+                    i--;
+                    continue;
+                }
                 user.fullname = GenerateFromFile(generatorPath + "fullnames.txt");
                 Random ran = new Random();
                 user.password = ran.Next(10000000, 99999999).ToString();
+                SHA256 sha256Hash = SHA256.Create();
+                string hash = GetHash(sha256Hash, user.password);
+                user.password = hash;
                 TimeSpan ts = new TimeSpan((long)(ran.NextDouble() * range.Ticks));
                 user.registrationDate = start + ts;
                 repo.userRepository.Insert(user);
             }
             Console.WriteLine("Done!");
+        }
+        static string GetHash(HashAlgorithm hashAlgorithm, string input)
+        {
+            byte[] data = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
+            var sBuilder = new StringBuilder();
+            for (int i = 0; i < data.Length; i++)
+            {
+                sBuilder.Append(data[i].ToString("x2"));
+            }
+            return sBuilder.ToString();
         }
         static int GetNumberOfEntities()
         {

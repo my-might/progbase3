@@ -106,24 +106,6 @@ namespace ClassLib
             connection.Close();
             return users;
         }
-        public int[] GetAllIds()
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT id FROM users";
-            SqliteDataReader reader = command.ExecuteReader();
-            List<int> ids = new List<int>();
-            while(reader.Read())
-            {
-                int currentId = int.Parse(reader.GetString(0));
-                ids.Add(currentId);
-            }
-            reader.Close();
-            connection.Close();
-            int[] result = new int[ids.Count];
-            ids.CopyTo(result);
-            return result;
-        }
         public DateTime GetMinRegistrationDate()
         {
             connection.Open();

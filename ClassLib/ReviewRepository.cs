@@ -36,7 +36,7 @@ namespace ClassLib
             connection.Close();
             return result;
         }
-        public void DeleteByFilmId(int filmId)
+        public long DeleteByFilmId(int filmId)
         {
             connection.Open();
             SqliteCommand command = connection.CreateCommand();
@@ -44,6 +44,7 @@ namespace ClassLib
             command.Parameters.AddWithValue("$filmId", filmId);
             long result = command.ExecuteNonQuery();
             connection.Close();
+            return result;
         }
         public long Update(long id, Review review)
         {
@@ -88,39 +89,6 @@ namespace ClassLib
             {
                 Review currentReview = GetReview(reader);
                 reviews.Add(currentReview);
-            }
-            reader.Close();
-            connection.Close();
-            return reviews;
-        }
-        public long GetCount()
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT COUNT(*) FROM reviews";
-            long result = (long)command.ExecuteScalar();
-            connection.Close();
-            return result;
-        }
-        public int GetTotalPages()
-        {
-            const int pageSize = 10;
-            return (int)Math.Ceiling(GetCount() / (double)pageSize);
-        }
-        public List<Review> GetPage(int p)
-        {
-            connection.Open();
-            const int pageSize = 10;
-            SqliteCommand command = this.connection.CreateCommand();
-            command.CommandText = @"SELECT * FROM reviews LIMIT $pageSize OFFSET $offset";
-            command.Parameters.AddWithValue("$pageSize",pageSize);
-            command.Parameters.AddWithValue("offset",pageSize*(p-1));
-            List<Review> reviews = new List<Review>();
-            SqliteDataReader reader = command.ExecuteReader();
-            while(reader.Read())
-            {
-                Review review = GetReview(reader);
-                reviews.Add(review);
             }
             reader.Close();
             connection.Close();

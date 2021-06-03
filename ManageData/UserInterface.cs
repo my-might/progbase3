@@ -66,6 +66,7 @@ namespace ManageData
                 Actor actor = repo.actorRepository.GetById(int.Parse(dialog.actorIdField.Text.ToString()));
                 GenerateObjects.SetInfo(actor, dialog.directory.Text.ToString(), repo);
                 GenerateObjects.GenerateReport();
+                MessageBox.Query("Report", "Report was generated successfully!", "OK");
             }
         }
         public static void Export()

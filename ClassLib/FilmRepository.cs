@@ -102,20 +102,6 @@ namespace ClassLib
             connection.Close();
             return films;
         }
-        public long GetCount()
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT COUNT(*) FROM films";
-            long result = (long)command.ExecuteScalar();
-            connection.Close();
-            return result;
-        }
-        public int GetTotalPages()
-        {
-            const int pageSize = 10;
-            return (int)Math.Ceiling(GetCount() / (double)pageSize);
-        }
         public int GetSearchPagesCount(string searchTitle)
         {
             const int pageSize = 10;
@@ -146,43 +132,6 @@ namespace ClassLib
             reader.Close();
             connection.Close();
             return films;
-        }
-        public List<Film> GetPage(int p)
-        {
-            connection.Open();
-            const int pageSize = 10;
-            SqliteCommand command = this.connection.CreateCommand();
-            command.CommandText = @"SELECT * FROM films LIMIT $pageSize OFFSET $offset";
-            command.Parameters.AddWithValue("$pageSize",pageSize);
-            command.Parameters.AddWithValue("offset",pageSize*(p-1));
-            List<Film> films = new List<Film>();
-            SqliteDataReader reader = command.ExecuteReader();
-            while(reader.Read())
-            {
-                Film film = GetFilm(reader);
-                films.Add(film);
-            }
-            reader.Close();
-            connection.Close();
-            return films;
-        }
-        public int[] GetAllIds()
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT id FROM films";
-            SqliteDataReader reader = command.ExecuteReader();
-            List<int> ids = new List<int>();
-            while(reader.Read())
-            {
-                int currentId = int.Parse(reader.GetString(0));
-                ids.Add(currentId);
-            }
-            reader.Close();
-            connection.Close();
-            int[] result = new int[ids.Count];
-            ids.CopyTo(result);
-            return result;
         }
         public int GetMinReleaseYear()
         {

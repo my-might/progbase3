@@ -9,7 +9,6 @@ namespace ManageData
         private int page = 1;
         private Label totalPagesLabel;
         private Label currentPageLabel;
-        private TextField searchPage;
         private TextField searchFullname;
         private string searchValue = "";
         private ListView allActors;
@@ -56,12 +55,6 @@ namespace ManageData
                 Height = 12
             };
             frameView.Add(allActors);
-            // searchPage = new TextField("")
-            // {
-            //     X = Pos.Center(), Y = 2,
-            //     Width = Dim.Percent(10)
-            // };
-            // searchPage.TextChanged += OnSearchPageEnter;
 
             Label fullnameLabel = new Label("Search by fullname:")
             {
@@ -115,7 +108,7 @@ namespace ManageData
                 repo.actorRepository.DeleteById(actor.id);
                 repo.roleRepository.DeleteByActorId(actor.id);
             }
-            if(page > repo.actorRepository.GetTotalPages() && page > 1)
+            if(page > repo.actorRepository.GetSearchPagesCount(searchValue) && page > 1)
             {
                 page--;
             }
@@ -153,32 +146,6 @@ namespace ManageData
             }
             ShowCurrentPage();
         }
-        private void OnSearchPageEnter(NStack.ustring args)
-        {
-            string errorText = "";
-            int toPage = 0;
-            if(searchPage.Text.ToString() == "")
-            {
-                errorText = "Field is empty.";
-            }
-            else if(!int.TryParse(searchPage.Text.ToString(), out toPage))
-            {
-                errorText = "Page must be integer.";
-            }
-            else if(toPage < 1 || toPage > repo.actorRepository.GetTotalPages())
-            {
-                errorText = "Page is out of range.";
-            }
-            if(errorText != "")
-            {
-                MessageBox.ErrorQuery("Error", errorText, "OK");
-            }
-            else 
-            {
-                this.page = toPage;
-                ShowCurrentPage();
-            }
-        }
         public void SetRepository(Service repo)
         {
             this.repo = repo;
@@ -199,7 +166,7 @@ namespace ManageData
         }
         private void ClickNextPage()
         {
-            int totalPages = repo.actorRepository.GetTotalPages();
+            int totalPages = repo.actorRepository.GetSearchPagesCount(searchValue);
             if(page == totalPages)
             {
                 return;

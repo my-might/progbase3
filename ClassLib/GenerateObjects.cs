@@ -18,8 +18,8 @@ namespace ClassLib
             List<Film> films = repo.roleRepository.GetForImage(actor.id);
             if(films.Count != 0)
             {
-                double[][] values = repo.roleRepository.ValuesForImage(films);
-                string[] titles = repo.roleRepository.TitlesForImage(films);
+                double[][] values = ValuesForImage(films);
+                string[] titles = TitlesForImage(films);
                 OHLC[] ohlcs = new OHLC[values.GetLength(0)];
                 for(int i = 0; i<values.GetLength(0); i++)
                 {
@@ -239,6 +239,51 @@ namespace ClassLib
             actor = actor1;
             directoryPath = directoryPath1;
             repo = repo1;
+        }
+        public static string[] TitlesForImage(List<Film> films)
+        {
+            string[] result = new string[films.Count];
+            for(int i = 0; i<films.Count; i++)
+            {
+                result[i] = films[i].id.ToString();
+            }
+            return result;
+        }
+        private static double[][] ValuesForImage(List<Film> films)
+        {
+            double[][] result = new double[films.Count][];
+            for(int i = 0; i<films.Count; i++)
+            {
+                result[i] = new double[4];
+                if(films[i].reviews.Count != 0)
+                {
+                    result[i][0] = films[i].reviews[0].rating;
+                    result[i][3] = films[i].reviews[films[i].reviews.Count-1].rating;
+                    double min = films[i].reviews[0].rating;
+                    double max = films[i].reviews[0].rating;
+                    foreach(Review review in films[i].reviews)
+                    {
+                        if(review.rating > max)
+                        {
+                            max = review.rating;
+                        }
+                        else if(review.rating < min)
+                        {
+                            min = review.rating;
+                        }
+                    }
+                    result[i][1] = max;
+                    result[i][2] = min;
+                }
+                else
+                {
+                    result[i][0] = 0;
+                    result[i][1] = 0;
+                    result[i][2] = 0;
+                    result[i][3] = 0;
+                }
+            }
+            return result;
         }
     }
 }

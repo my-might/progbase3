@@ -6,7 +6,6 @@ namespace ManageData
     public class MainWindowUser : Window
     {
         private Service repo;
-        private TextField idToShow;
         private Button viewReviews;
         private Button createActor;
         private Button createFilm;

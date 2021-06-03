@@ -83,39 +83,6 @@ namespace ClassLib
             connection.Close();
             return actors;
         }
-        public long GetCount()
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT COUNT(*) FROM actors";
-            long result = (long)command.ExecuteScalar();
-            connection.Close();
-            return result;
-        }
-        public int GetTotalPages()
-        {
-            const int pageSize = 10;
-            return (int)Math.Ceiling(GetCount() / (double)pageSize);
-        }
-        public List<Actor> GetPage(int p)
-        {
-            connection.Open();
-            const int pageSize = 10;
-            SqliteCommand command = this.connection.CreateCommand();
-            command.CommandText = @"SELECT * FROM actors LIMIT $pageSize OFFSET $offset";
-            command.Parameters.AddWithValue("$pageSize",pageSize);
-            command.Parameters.AddWithValue("offset",pageSize*(p-1));
-            List<Actor> actors = new List<Actor>();
-            SqliteDataReader reader = command.ExecuteReader();
-            while(reader.Read())
-            {
-                Actor actor = GetActor(reader);
-                actors.Add(actor);
-            }
-            reader.Close();
-            connection.Close();
-            return actors;
-        }
         public int GetSearchPagesCount(string searchFullname)
         {
             const int pageSize = 10;
@@ -146,24 +113,6 @@ namespace ClassLib
             reader.Close();
             connection.Close();
             return actors;
-        }
-        public int[] GetAllIds()
-        {
-            connection.Open();
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"SELECT id FROM actors";
-            SqliteDataReader reader = command.ExecuteReader();
-            List<int> ids = new List<int>();
-            while(reader.Read())
-            {
-                int currentId = int.Parse(reader.GetString(0));
-                ids.Add(currentId);
-            }
-            reader.Close();
-            connection.Close();
-            int[] result = new int[ids.Count];
-            ids.CopyTo(result);
-            return result;
         }
         private static Actor GetActor(SqliteDataReader reader)
         {

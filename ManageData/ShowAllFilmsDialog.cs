@@ -110,7 +110,7 @@ namespace ManageData
                 repo.roleRepository.DeleteByFilmId(film.id);
                 repo.reviewRepository.DeleteByFilmId(film.id);
             }
-            if(page > repo.filmRepository.GetTotalPages() && page > 1)
+            if(page > repo.filmRepository.GetSearchPagesCount(searchValue) && page > 1)
             {
                 page--;
             }
@@ -168,7 +168,7 @@ namespace ManageData
         }
         private void ClickNextPage()
         {
-            int totalPages = repo.filmRepository.GetTotalPages();
+            int totalPages = repo.filmRepository.GetSearchPagesCount(searchValue);
             if(page == totalPages)
             {
                 return;
@@ -178,7 +178,7 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            int totalPages = repo.filmRepository.GetSearchPagesCount(searchTitle.Text.ToString());
+            int totalPages = repo.filmRepository.GetSearchPagesCount(searchValue);
             if(page > totalPages && page > 1)
             {
                 page = totalPages;
@@ -200,7 +200,7 @@ namespace ManageData
             {
                 this.currentPageLabel.Text = this.page.ToString();
                 this.totalPagesLabel.Text = totalPages.ToString();
-                this.allFilms.SetSource(repo.filmRepository.GetSearchPage(searchTitle.Text.ToString(), page));
+                this.allFilms.SetSource(repo.filmRepository.GetSearchPage(searchValue, page));
             }
         }
         private void DialogCanceled()
