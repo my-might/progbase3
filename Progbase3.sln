@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "Generator\Gene
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManageData", "ManageData\ManageData.csproj", "{6548A71C-BF24-48E0-931D-2E599F0746D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPCLib", "RPCLib\RPCLib.csproj", "{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,5 +72,17 @@ Global
 		{6548A71C-BF24-48E0-931D-2E599F0746D3}.Release|x64.Build.0 = Release|Any CPU
 		{6548A71C-BF24-48E0-931D-2E599F0746D3}.Release|x86.ActiveCfg = Release|Any CPU
 		{6548A71C-BF24-48E0-931D-2E599F0746D3}.Release|x86.Build.0 = Release|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Debug|x64.Build.0 = Debug|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Debug|x86.Build.0 = Debug|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Release|x64.ActiveCfg = Release|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Release|x64.Build.0 = Release|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Release|x86.ActiveCfg = Release|Any CPU
+		{60F20A2D-9082-48C3-8CA9-730EEE2B9CCE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -29,5 +29,24 @@ namespace ClassLib
             this.isModerator = isModerator;
             this.registrationDate = registrationDate;
         }
+        public string UserConnection()
+        {
+            string separator = "#$&";
+            string connection = id+separator+username+separator+fullname+separator+password+separator+isModerator+separator+registrationDate;
+            return connection;
+        }
+        public User UserParser(string connection)
+        {
+            string separator = "#$&";
+            string[] parameters = connection.Split(separator);
+            User user = new User();
+            user.id = int.Parse(parameters[0]);
+            user.username = parameters[1];
+            user.fullname = parameters[2];
+            user.password = parameters[3];
+            user.isModerator = int.Parse(parameters[4]);
+            user.registrationDate = DateTime.Parse(parameters[5]);
+            return user;
+        }
     }
 }

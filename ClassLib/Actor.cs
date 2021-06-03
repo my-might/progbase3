@@ -27,5 +27,22 @@ namespace ClassLib
         {
             return string.Format($"[{this.id}] {this.fullname}, {this.country}, {this.birthDate.ToShortDateString()}");
         }
+        public string ActorConnection()
+        {
+            string separator = "#$&";
+            string connection = id+separator+fullname+separator+country+separator+birthDate;
+            return connection;
+        }
+        public Actor ActorParser(string connection)
+        {
+            string separator = "#$&";
+            string[] parameters = connection.Split(separator);
+            Actor actor = new Actor();
+            actor.id = int.Parse(parameters[0]);
+            actor.fullname = parameters[1];
+            actor.country = parameters[2];
+            actor.birthDate = DateTime.Parse(parameters[3]);
+            return actor;
+        }
     }
 }
