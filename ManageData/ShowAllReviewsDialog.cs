@@ -9,7 +9,8 @@ namespace ManageData
         private int page = 1;
         private Label totalPagesLabel;
         private Label currentPageLabel;
-        private TextField searchPage;
+        private TextField searchOpinion;
+        private string searchValue = "";
         private ListView allReviews;
         private User user;
         public ShowAllReviewsDialog()
@@ -54,13 +55,27 @@ namespace ManageData
                 Height = 12
             };
             frameView.Add(allReviews);
-            searchPage = new TextField("")
+
+            Label opinionLabel = new Label("Search by opinion:")
             {
-                X = Pos.Center(), Y = 2,
-                Width = Dim.Percent(10)
+                X = 5, Y = Pos.Bottom(frameView)
             };
-            searchPage.KeyPress += OnSearchEnter;
-            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, frameView, searchPage);
+            searchOpinion = new TextField("")
+            {
+                X = Pos.Right(opinionLabel) + 1, Y = Pos.Y(opinionLabel), Width = Dim.Percent(50)
+            };
+            searchOpinion.KeyPress += OnSearchOpinionEnter;
+
+            this.Add(title, prevPage, nextPage, currentPageLabel, totalPagesLabel, frameView, opinionLabel, searchOpinion);
+        }
+        private void OnSearchOpinionEnter(KeyEventEventArgs args)
+        {
+            if(args.KeyEvent.Key == Key.Enter)
+            {
+                page = 1;
+                this.searchValue = this.searchOpinion.Text.ToString();
+                ShowCurrentPage();
+            }
         }
         private void OnOpenReview(ListViewItemEventArgs args)
         {
@@ -92,36 +107,6 @@ namespace ManageData
             }
             ShowCurrentPage();
         }
-        private void OnSearchEnter(KeyEventEventArgs args)
-        {
-            string errorText = "";
-            int toPage = 0;
-            if(args.KeyEvent.Key != Key.Enter)
-            {
-                return;
-            }
-            if(searchPage.Text.ToString() == "")
-            {
-                errorText = "Field is empty.";
-            }
-            else if(!int.TryParse(searchPage.Text.ToString(), out toPage))
-            {
-                errorText = "Page must be integer.";
-            }
-            else if(toPage < 1 || toPage > repo.reviewRepository.GetTotalPages())
-            {
-                errorText = "Page is out of range.";
-            }
-            if(errorText != "")
-            {
-                MessageBox.ErrorQuery("Error", errorText, "OK");
-            }
-            else 
-            {
-                this.page = toPage;
-                ShowCurrentPage();
-            }
-        }
         public void SetRepository(Service repo)
         {
             this.repo = repo;
@@ -152,7 +137,15 @@ namespace ManageData
         }
         private void ShowCurrentPage()
         {
-            int totalPages = repo.reviewRepository.GetTotalPages();
+            int totalPages = repo.reviewRepository.GetSearchPagesCount(searchOpinion.Text.ToString());
+            if(page > totalPages && page > 1)
+            {
+                page = totalPages;
+            }
+            if(totalPages != 0 && page == 0)
+            {
+                page = 1;
+            }
             if(totalPages == 0)
             {
                 this.page = 0;
@@ -166,7 +159,7 @@ namespace ManageData
             {
                 this.currentPageLabel.Text = this.page.ToString();
                 this.totalPagesLabel.Text = totalPages.ToString();
-                this.allReviews.SetSource(repo.reviewRepository.GetPage(page));
+                this.allReviews.SetSource(repo.reviewRepository.GetSearchPage(searchOpinion.Text.ToString(), page));
             }
         }
         private void DialogCanceled()

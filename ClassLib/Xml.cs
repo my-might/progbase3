@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
-using Microsoft.Data.Sqlite;
+using System;
 namespace ClassLib
 {
     public static class Xml
@@ -14,7 +14,7 @@ namespace ClassLib
         public static void ExportData(List<Film> films, string directoryPath)
         {
             XmlSerializer ser = new XmlSerializer(typeof(List<Film>));
-            StreamWriter sw = new System.IO.StreamWriter(directoryPath + "/export.xml");
+            StreamWriter sw = new System.IO.StreamWriter(directoryPath + $"/export_{DateTime.Now.ToString().Replace("/", ".")}.xml");
             ser.Serialize(sw, films);
             sw.Close();
         }

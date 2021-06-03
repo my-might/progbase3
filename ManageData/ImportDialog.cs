@@ -4,7 +4,7 @@ namespace ManageData
     public class Import : Dialog
     {
         public bool canceled;
-        public Label directory;
+        public TextField filePath;
         public Import()
         {
             this.Title = "Import";
@@ -14,45 +14,44 @@ namespace ManageData
             Button cancel = new Button("Cancel"); 
             cancel.Clicked += DialogCanceled;
             this.AddButton(cancel);
-            Label filePathLabel = new Label("Select file:")
+            
+            Label filePathLabel = new Label("Select directory:")
             {
-                X = 4, Y = Pos.Center()
+                X = Pos.Center(), Y = 5
             };
-            Button openDirectory = new Button("Open file")
+            Button openDirectory = new Button("Open directory")
             {
-                X = 20, Y = Pos.Top(filePathLabel)
+                X = Pos.Center(), Y = Pos.Bottom(filePathLabel)
             };
             openDirectory.Clicked += SelectDirectory;
-            directory = new Label("not selected")
+            filePath = new TextField("not selected")
             {
-                X = 20, Y = Pos.Top(filePathLabel) + 1, Width = Dim.Fill()
+                X = Pos.Center(), Y = Pos.Bottom(openDirectory) + 1, Width = Dim.Fill() - 4
             };
-            this.Add(filePathLabel, openDirectory, directory);
+            this.Add(filePathLabel, openDirectory, filePath);
         }
         private void SelectDirectory()
         {
-            OpenDialog dialog = new OpenDialog("Open file", "Open?");
-            dialog.CanChooseDirectories = false;
-            dialog.CanChooseFiles = true;
+            OpenDialog dialog = new OpenDialog("Open XML file", "Open?");
             Application.Run(dialog);
         
             if (!dialog.Canceled)
             {
-                NStack.ustring filePath = dialog.FilePath;
-                directory.Text = filePath;
+                NStack.ustring filePath1 = dialog.FilePath;
+                filePath.Text = filePath1;
             }
             else
             {
-                directory.Text = "not selected.";
+                filePath.Text = "not selected.";
             }
         }
         
         private void DialogSubmit()
         {
             string errorText = "";
-            if(directory.Text.ToString() == "")
+            if(filePath.Text.ToString() == "not selected")
             {
-                errorText = "You have to choose file to import from.";
+                errorText = "You have to choose file to import from";
             }
             if(errorText != "")
             {

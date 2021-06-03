@@ -126,6 +126,37 @@ namespace ClassLib
             connection.Close();
             return reviews;
         }
+        public int GetSearchPagesCount(string searchOpinion)
+        {
+            const int pageSize = 10;
+            connection.Open();
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT COUNT(*) FROM reviews WHERE opinion LIKE '%' || $value || '%'";
+            command.Parameters.AddWithValue("$value", searchOpinion);
+            long result = (long)command.ExecuteScalar();
+            connection.Close();
+            return (int)Math.Ceiling((int)result / (double)pageSize);
+        }
+        public List<Review> GetSearchPage(string searchOpinion, int page)
+        {
+            const int pageSize = 10;
+            connection.Open();
+            SqliteCommand command = this.connection.CreateCommand();
+            command.CommandText = @"SELECT * FROM reviews WHERE opinion LIKE '%' || $value || '%' LIMIT $pageSize OFFSET $offset";
+            command.Parameters.AddWithValue("$pageSize",pageSize);
+            command.Parameters.AddWithValue("offset",pageSize*(page-1));
+            command.Parameters.AddWithValue("$value", searchOpinion);
+            List<Review> reviews = new List<Review>();
+            SqliteDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                Review review = GetReview(reader);
+                reviews.Add(review);
+            }
+            reader.Close();
+            connection.Close();
+            return reviews;
+        }
         public List<Review> GetAllFilmReviews(int id)
         {
             connection.Open();
@@ -163,13 +194,17 @@ namespace ClassLib
         public double GetAverageFilmRating(int filmId)
         {
             List<Review> reviews = GetAllFilmReviews(filmId);
+            if(reviews.Count == 0)
+            {
+                return 0;
+            }
             int sum = 0;
             foreach(Review review in reviews)
             {
                 sum += review.rating;
             }
             double result = Math.Round((double)sum/reviews.Count, 2);
-            return (double)sum/reviews.Count;
+            return result;
         }
         private static Review GetReview(SqliteDataReader reader)
         {

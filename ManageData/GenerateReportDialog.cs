@@ -2,22 +2,23 @@ using Terminal.Gui;
 using ClassLib;
 namespace ManageData
 {
-    public class Export : Dialog
+    public class GenerateReportDialog : Dialog
     {
         public bool canceled;
-        public TextField directory;
-        public TextField actorIdField;
         private ActorRepository repo;
-        public Export()
+        public TextField actorIdField;
+        public TextField directory;
+        public GenerateReportDialog()
         {
-            this.Title = "Export";
+            this.Title = "Generate report";
             Button ok = new Button("OK");
             ok.Clicked += DialogSubmit;
-            this.AddButton(ok);
             Button cancel = new Button("Cancel"); 
             cancel.Clicked += DialogCanceled;
+            this.AddButton(ok);
             this.AddButton(cancel);
-            Label actorIdLabel = new Label("Actor id:")
+
+            Label actorIdLabel = new Label("Actor id to get info:")
             {
                 X = Pos.Center(), Y = 4
             };
@@ -37,7 +38,8 @@ namespace ManageData
             openDirectory.Clicked += SelectDirectory;
             directory = new TextField("not selected")
             {
-                X = Pos.Center(), Y = Pos.Bottom(openDirectory) + 1, Width = Dim.Fill() - 4
+                X = Pos.Center(), Y = Pos.Bottom(openDirectory) + 1, Width = Dim.Fill() - 4,
+                ReadOnly = true
             };
             this.Add(actorIdLabel, actorIdField, filePathLabel, openDirectory, directory);
         }
@@ -46,6 +48,7 @@ namespace ManageData
             OpenDialog dialog = new OpenDialog("Open directory", "Open?");
             dialog.CanChooseDirectories = true;
             dialog.CanChooseFiles = false;
+            
             Application.Run(dialog);
         
             if (!dialog.Canceled)
@@ -77,9 +80,9 @@ namespace ManageData
             {
                 errorText = "Entered actor id does not exist in the database.";
             }
-            else if(directory.Text.ToString() == "not selected")
+            else if(directory.Text.ToString() == "")
             {
-                errorText = "You have to choose directory to save export.";
+                errorText = "You have to choose directory to save report.";
             }
             if(errorText != "")
             {

@@ -9,7 +9,6 @@ namespace ManageData
         private int page = 1;
         private Label totalPagesLabel;
         private Label currentPageLabel;
-        private TextField searchPage;
         private TextField searchTitle;
         private string searchValue = "";
         private ListView allFilms;
@@ -56,12 +55,6 @@ namespace ManageData
                 Height = 12
             };
             frameView.Add(allFilms);
-            // searchPage = new TextField("")
-            // {
-            //     X = Pos.Center(), Y = 2,
-            //     Width = Dim.Percent(10)
-            // };
-            // searchPage.KeyPress += OnSearchPageAlt;
 
             Label titleLabel = new Label("Search by title:")
             {
@@ -154,36 +147,6 @@ namespace ManageData
                     }
             }
             ShowCurrentPage();
-        }
-        private void OnSearchPageAlt(KeyEventEventArgs args)
-        {
-            string errorText = "";
-            int toPage = 0;
-            if(args.KeyEvent.Key != Key.AltMask)
-            {
-                return;
-            }
-            if(searchPage.Text.ToString() == "")
-            {
-                errorText = "Field is empty.";
-            }
-            else if(!int.TryParse(searchPage.Text.ToString(), out toPage))
-            {
-                errorText = "Page must be integer.";
-            }
-            else if(toPage < 1 || toPage > repo.filmRepository.GetTotalPages())
-            {
-                errorText = "Page is out of range.";
-            }
-            if(errorText != "")
-            {
-                MessageBox.ErrorQuery("Error", errorText, "OK");
-            }
-            else 
-            {
-                this.page = toPage;
-                ShowCurrentPage();
-            }
         }
         public void SetRepository(Service repo)
         {

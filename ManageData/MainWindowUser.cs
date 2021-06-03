@@ -77,25 +77,6 @@ namespace ManageData
             promoteUser.Clicked += ClickPromoteUser;
 
             this.Add(profile, viewFilms, viewActors, viewReviews, createReview, createFilm, createActor, promoteUser);
-            // Label idLabel = new Label("ID:")
-            // {
-            //     X = Pos.Center() - 7, Y = 14
-            // };
-            // idToShow = new TextField("")
-            // {
-            //     X = Pos.Center(), Y = 14, Width = Dim.Percent(5)
-            // };
-            // Button showFilms = new Button("Find film")
-            // {
-            //     X = Pos.Center(), Y = 15
-            // };
-            // showFilms.Clicked += ClickFindFilm;
-            // Button showActors = new Button("Find actor")
-            // {
-            //     X = Pos.Center(), Y = 16
-            // };
-            // showActors.Clicked += ClickFindActor;
-            // this.Add(idLabel, idToShow, showFilms, showActors);
 
             loggedUser = new Label(" ")
             {
@@ -119,7 +100,6 @@ namespace ManageData
             {
                 logged.Text = "You are successfully logged as user.";
                 isModerator = false;
-                viewReviews.Visible = false;
                 createActor.Visible = false;
                 createFilm.Visible = false;
                 promoteUser.Visible = false;
@@ -128,7 +108,6 @@ namespace ManageData
             {
                 logged.Text = "You are successfully logged as moderator.";
                 isModerator = true;
-                viewReviews.Visible = true;
             }
         }
         private void OnLogOut()
@@ -322,73 +301,6 @@ namespace ManageData
             dialog.SetUser(currentUser);
             dialog.SetReviews();
             Application.Run(dialog);
-        }
-        private void ClickFindFilm()
-        {
-            string errorText = "";
-            int id = 0;
-            if(idToShow.Text.ToString() == "")
-            {
-                errorText = "ID field mustn`t be empty.";
-            }
-            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
-            {
-                errorText = "ID must be positive integer.";
-            }
-            else if(repo.filmRepository.GetById(id) == null)
-            {
-                errorText = $"Film with id [{id}] doesn`t exist.";
-            }
-            if(errorText != "")
-            {
-                MessageBox.ErrorQuery("Error", errorText, "OK");
-                return;
-            }
-            else
-            {
-                ShowFilmDialog dialog = new ShowFilmDialog();
-                Film filmToSet = repo.filmRepository.GetById(id);
-                List<Actor> roles = repo.roleRepository.GetAllActors(id);
-                filmToSet.actors = new Actor[roles.Count];
-                roles.CopyTo(filmToSet.actors);
-                dialog.SetFilm(filmToSet);
-                dialog.SetService(repo);
-                dialog.SetUser(currentUser);
-                Application.Run(dialog);
-            }
-        }
-        private void ClickFindActor()
-        {
-            string errorText = "";
-            int id = 0;
-            if(idToShow.Text.ToString() == "")
-            {
-                errorText = "ID field mustn`t be empty.";
-            }
-            else if(!int.TryParse(idToShow.Text.ToString(), out id) || id < 1)
-            {
-                errorText = "ID must be positive integer.";
-            }
-            else if(repo.actorRepository.GetById(id) == null)
-            {
-                errorText = $"Actor with id [{id}] doesn`t exist.";
-            }
-            if(errorText != "")
-            {
-                MessageBox.ErrorQuery("Error", errorText, "OK");
-                return;
-            }
-            else
-            {
-                ShowActorDialog dialog = new ShowActorDialog();
-                Actor actorToSet = repo.actorRepository.GetById(id);
-                List<Film> roles = repo.roleRepository.GetAllFilms(id);
-                actorToSet.films = new Film[roles.Count];
-                roles.CopyTo(actorToSet.films);
-                dialog.SetActor(actorToSet);
-                dialog.SetRepository(repo.filmRepository);
-                Application.Run(dialog);
-            }
         }
         private void ClickShowFilms()
         {
