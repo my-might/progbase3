@@ -17,7 +17,7 @@ namespace ClassLib
             string connection = id+separator+actorId+separator+filmId;
             return connection;
         }
-        public Role RoleParser(string connection)
+        public static Role RoleParser(string connection)
         {
             string separator = "#$&";
             string[] parameters = connection.Split(separator);

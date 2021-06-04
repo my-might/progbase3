@@ -33,7 +33,7 @@ namespace ClassLib
             string connection = id+separator+opinion+separator+rating+separator+postedAt+separator+userId+separator+filmId;
             return connection;
         }
-        public Review ReviewParser(string connection)
+        public static Review ReviewParser(string connection)
         {
             string separator = "#$&";
             string[] parameters = connection.Split(separator);

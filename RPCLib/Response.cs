@@ -7,5 +7,6 @@ namespace RPCLib
     public class Response<T>
     {
        public T value;
+       public bool errors;
     }
 }

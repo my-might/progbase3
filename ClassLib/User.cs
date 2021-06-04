@@ -35,7 +35,7 @@ namespace ClassLib
             string connection = id+separator+username+separator+fullname+separator+password+separator+isModerator+separator+registrationDate;
             return connection;
         }
-        public User UserParser(string connection)
+        public static User UserParser(string connection)
         {
             string separator = "#$&";
             string[] parameters = connection.Split(separator);

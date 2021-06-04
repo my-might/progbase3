@@ -35,7 +35,7 @@ namespace ClassLib
             string connection = id+separator+title+separator+genre+separator+description+separator+releaseYear;
             return connection;
         }
-        public Film FilmParser(string connection)
+        public static Film FilmParser(string connection)
         {
             string separator = "#$&";
             string[] parameters = connection.Split(separator);

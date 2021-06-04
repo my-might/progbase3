@@ -33,7 +33,7 @@ namespace ClassLib
             string connection = id+separator+fullname+separator+country+separator+birthDate;
             return connection;
         }
-        public Actor ActorParser(string connection)
+        public static Actor ActorParser(string connection)
         {
             string separator = "#$&";
             string[] parameters = connection.Split(separator);
