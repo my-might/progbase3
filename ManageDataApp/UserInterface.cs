@@ -78,8 +78,8 @@ namespace ManageDataApp
             Application.Run(dialog);
             if(!dialog.canceled)
             {
-                Xml.SetRepository(repo.filmRepository);
-                Xml.ExportData(repo.roleRepository.GetAllFilms(int.Parse(dialog.actorIdField.Text.ToString())), dialog.directory.Text.ToString());
+                XmlSerialization.SetRepository(repo.filmRepository);
+                XmlSerialization.ExportData(repo.roleRepository.GetAllFilms(int.Parse(dialog.actorIdField.Text.ToString())), dialog.directory.Text.ToString());
                 MessageBox.Query("Export", "Data was exported successfully!", "OK");
             }
         }
@@ -91,8 +91,8 @@ namespace ManageDataApp
             {
                 try
                 {
-                    Xml.SetRepository(repo.filmRepository);
-                    Xml.ImportData(dialog.filePath.Text.ToString());
+                    XmlSerialization.SetRepository(repo.filmRepository);
+                    XmlSerialization.ImportData(dialog.filePath.Text.ToString());
                     MessageBox.Query("Export", "Data was imported successfully!", "OK");
                 }
                 catch

@@ -6,7 +6,7 @@ using RPCLib;
 using ClassLib;
 namespace DataProcessLib
 {
-    public static class Xml
+    public static class XmlSerialization
     {
         private static RemoteFilmRepository repo;
         public static void SetRepository(RemoteFilmRepository repo1)
