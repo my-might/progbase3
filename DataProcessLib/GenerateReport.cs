@@ -47,6 +47,7 @@ namespace DataProcessLib
             ZipFile.CreateFromDirectory(extractPath, directoryPath + $"/Report_{DateTime.Now.ToString().Replace("/", ".")}.docx");
             Directory.Delete("./../data/sample", true);
         }
+        
         private static void FindAndReplace(XElement node)
         {
             if (node.FirstNode != null && node.FirstNode.NodeType == XmlNodeType.Text)
