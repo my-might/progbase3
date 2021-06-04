@@ -165,23 +165,20 @@ namespace ClassLib
         }
         public List<Film> GetForImage(int id)
         {
-            List<Film> films = GetAllFilms(id);
-            foreach(Film film in films)
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"SELECT films.id, title, genre, description, releaseYear 
+                                    FROM films, roles WHERE roles.actorId = $id AND roles.filmId = films.id ORDER BY releaseYear";
+            command.Parameters.AddWithValue("$id", id);
+            SqliteDataReader reader = command.ExecuteReader();
+            List<Film> films = new List<Film>();
+            while(reader.Read())
             {
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = @"SELECT * FROM reviews WHERE filmId = $id ORDER BY postedAt";
-                command.Parameters.AddWithValue("$id", film.id);
-                SqliteDataReader reader = command.ExecuteReader();
-                film.reviews = new List<Review>();
-                while(reader.Read())
-                {
-                    Review currentReview = GetReview(reader);
-                    film.reviews.Add(currentReview);
-                }
-                reader.Close();
-                connection.Close();
+                Film currentFilm = GetFilm(reader);
+                films.Add(currentFilm);
             }
+            reader.Close();
+            connection.Close();
             return films;
         }
         private static Role GetRole(SqliteDataReader reader)

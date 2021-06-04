@@ -1,4 +1,6 @@
 using ScottPlot;
+using System.Drawing;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.IO;
@@ -7,6 +9,7 @@ using System.Xml;
 using System.Xml.Linq;
 using RPCLib;
 using ClassLib;
+using ScottPlot.Plottable;
 namespace DataProcessLib
 {
     public static class GenerateObjects
@@ -16,24 +19,17 @@ namespace DataProcessLib
         private static RemoteService repo;
         private static void GenerateImage()
         {
-            ScottPlot.Plot plt = new ScottPlot.Plot(600, 450);
+            Plot plt = new Plot(600, 400);
             List<Film> films = repo.roleRepository.GetForImage(actor.id);
-            if(films.Count != 0)
-            {
-                double[][] values = ValuesForImage(films);
-                string[] titles = TitlesForImage(films);
-                OHLC[] ohlcs = new OHLC[values.GetLength(0)];
-                for(int i = 0; i<values.GetLength(0); i++)
-                {
-                    ohlcs[i] = new OHLC(values[i][0], values[i][1], values[i][2], values[i][3], i, 1);
-                }
-                plt.AddCandlesticks(ohlcs);
-                string[] tickLabels = titles;
-                plt.XTicks(tickLabels);
-            }
-            plt.YLabel("Rating");
-            plt.XLabel("Film ids");
-            plt.Title($"Film reviews changes for actor witn id {actor.id}");
+            double[] values = ValuesForImage(films);
+            double[] offsets = OffsetsForImage(films);
+
+            BarPlot bar = plt.AddBar(values);
+            bar.ValueOffsets = offsets;
+            plt.XTicks(TitlesForImage(films));
+            plt.Title("Waterfall Bar Graph");
+            bar.FillColorNegative = Color.Red;
+            bar.FillColor = Color.Green;
 
             plt.SaveFig("./../data/sample/word/media/image1.png");
         }
@@ -45,7 +41,7 @@ namespace DataProcessLib
 
             XElement root = XElement.Load("./../data/sample/word/document.xml");
             FindAndReplace(root);
-            root.Save("./../data//sample/word/document.xml");
+            root.Save("./../data/sample/word/document.xml");
             File.Delete("./../data/sample/word/media/image1.png");
             GenerateImage();
             ZipFile.CreateFromDirectory(extractPath, directoryPath + $"/Report_{DateTime.Now.ToString().Replace("/", ".")}.docx");
@@ -251,41 +247,36 @@ namespace DataProcessLib
             }
             return result;
         }
-        private static double[][] ValuesForImage(List<Film> films)
+        private static double[] ValuesForImage(List<Film> films)
         {
-            double[][] result = new double[films.Count][];
+            double[] values = new double[films.Count];
+            double sum = 0;
             for(int i = 0; i<films.Count; i++)
             {
-                result[i] = new double[4];
-                if(films[i].reviews.Count != 0)
-                {
-                    result[i][0] = films[i].reviews[0].rating;
-                    result[i][3] = films[i].reviews[films[i].reviews.Count-1].rating;
-                    double min = films[i].reviews[0].rating;
-                    double max = films[i].reviews[0].rating;
-                    foreach(Review review in films[i].reviews)
-                    {
-                        if(review.rating > max)
-                        {
-                            max = review.rating;
-                        }
-                        else if(review.rating < min)
-                        {
-                            min = review.rating;
-                        }
-                    }
-                    result[i][1] = max;
-                    result[i][2] = min;
-                }
-                else
-                {
-                    result[i][0] = 0;
-                    result[i][1] = 0;
-                    result[i][2] = 0;
-                    result[i][3] = 0;
-                }
+                values[i] = repo.reviewRepository.GetAverageFilmRating(films[i].id) - sum;
+                sum += repo.reviewRepository.GetAverageFilmRating(films[i].id) - sum;
             }
-            return result;
+            return values;
+        }
+        private static double[] OffsetsForImage(List<Film> films)
+        {
+            double[] offsets = new double[films.Count];
+            double[] values = ValuesForImage(films);
+            double sum = 0;
+            for(int i = 0; i<films.Count; i++)
+            {
+                offsets[i] = sum;
+                sum += values[i];
+                // if(i == 0)
+                // {
+                //     offsets[i] = 0;
+                // }
+                // else
+                // {
+                //     offsets[i] = repo.reviewRepository.GetAverageFilmRating(films[i-1].id);
+                // }
+            }
+            return offsets;
         }
     }
 }
